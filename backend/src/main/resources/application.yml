@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: company-website
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/company_website?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+    show-sql: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+  jackson:
+    time-zone: Asia/Seoul
+
+jwt:
+  secret: ${JWT_SECRET:change-me}
+  expiration: 86400000
+
+file:
+  upload-dir: ${UPLOAD_DIR:uploads}
+  allowed-image-types:
+    - image/jpeg
+    - image/png
+    - image/gif
+    - image/webp
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

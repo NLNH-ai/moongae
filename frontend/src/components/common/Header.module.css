@@ -1,0 +1,220 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+  background-color: transparent;
+  transition:
+    background-color var(--transition-default),
+    box-shadow var(--transition-default),
+    backdrop-filter var(--transition-default);
+}
+
+.headerSolid {
+  backdrop-filter: blur(18px);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.06);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 5.5rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.logoMark {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary), #ff8c52);
+}
+
+.logoText {
+  font-size: 1.05rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navItem {
+  padding: 1.7rem 0;
+}
+
+.navLink {
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: color var(--transition-default);
+}
+
+.navLink:hover,
+.navLinkActive {
+  color: var(--color-primary);
+}
+
+.dropdown {
+  position: fixed;
+  top: 5.45rem;
+  left: 50%;
+  z-index: 10;
+  width: min(1180px, calc(100vw - 3rem));
+  opacity: 0;
+  transform: translate(-50%, 1rem);
+  pointer-events: none;
+  transition:
+    opacity var(--transition-default),
+    transform var(--transition-default);
+}
+
+.navItem:hover .dropdown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.dropdownInner {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  padding: 1.6rem 2rem;
+  border: 1px solid rgba(26, 26, 26, 0.06);
+  border-radius: 1.75rem;
+  background-color: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-card);
+}
+
+.dropdownHeading {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.dropdownLinks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dropdownItem {
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-subtle);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.mobileToggle,
+.mobilePanel,
+.mobileBackdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .nav {
+    display: none;
+  }
+
+  .mobileToggle {
+    display: grid;
+    gap: 0.35rem;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.5rem;
+    border: 0;
+    background: transparent;
+  }
+
+  .mobileToggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--color-text);
+  }
+
+  .mobileBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 61;
+    background-color: rgba(26, 26, 26, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-default);
+  }
+
+  .mobileBackdropVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobilePanel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 62;
+    display: grid;
+    width: min(24rem, 84vw);
+    padding: 1.25rem;
+    background-color: #ffffff;
+    box-shadow: -20px 0 50px rgba(26, 26, 26, 0.12);
+    transform: translateX(100%);
+    transition: transform var(--transition-default);
+  }
+
+  .mobilePanelOpen {
+    transform: translateX(0);
+  }
+
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobileHeader button {
+    border: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+  }
+
+  .mobileMenu {
+    display: grid;
+    gap: 1.2rem;
+    padding-top: 1.2rem;
+  }
+
+  .mobileItem {
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobileLink {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .mobileChildren {
+    display: grid;
+    gap: 0.55rem;
+    padding-top: 0.85rem;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+  }
+}

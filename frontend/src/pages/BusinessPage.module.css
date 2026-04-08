@@ -1,0 +1,140 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.featureCard {
+  position: relative;
+  display: flex;
+  min-height: 24rem;
+  overflow: hidden;
+  align-items: flex-end;
+  padding: 1.75rem;
+  border-radius: 1.75rem;
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.featureCard::after {
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.25rem;
+  content: '';
+}
+
+.featureBackdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, rgba(232, 93, 44, 0.78), rgba(15, 15, 15, 0.92));
+  background-position: center;
+  background-size: cover;
+  transition: transform 420ms ease;
+}
+
+.featureCard:hover .featureBackdrop {
+  transform: scale(1.04);
+}
+
+.featureOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 15, 15, 0.08), rgba(15, 15, 15, 0.84));
+}
+
+.featureContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.featureLabel {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.14);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.featureContent h3 {
+  margin: 0;
+  font-size: 1.9rem;
+  line-height: 1.05;
+}
+
+.featureContent p {
+  margin: 0;
+  max-width: 18rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.75;
+}
+
+.featureLink {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.85rem 1.05rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.14);
+  font-weight: 700;
+}
+
+.metricStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.metricCard {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.metricLabel {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.metricCopy {
+  margin: 0.75rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 1199px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricStrip {
+    grid-template-columns: 1fr;
+  }
+}

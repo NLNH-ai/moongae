@@ -1,0 +1,23 @@
+[Unit]
+Description=Company Website Spring Boot API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/company-website/backend
+EnvironmentFile=/etc/company-website/env
+ExecStartPre=/usr/bin/test -f /var/www/company-website/run/company-website.jar
+ExecStart=/usr/bin/java -jar /var/www/company-website/run/company-website.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+UMask=0027
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

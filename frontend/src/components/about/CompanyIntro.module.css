@@ -1,0 +1,106 @@
+.section {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.copyBlock {
+  padding: 2rem;
+  border-radius: 1.75rem;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  margin: 1.1rem 0 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+
+.description {
+  margin: 1.1rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.9;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0 0;
+}
+
+.facts div {
+  padding: 1rem 1.1rem;
+  border-radius: 1.1rem;
+  background-color: var(--color-surface-subtle);
+}
+
+.facts dt {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.facts dd {
+  margin: 0.55rem 0 0;
+  font-weight: 700;
+}
+
+.visual {
+  display: grid;
+  gap: 1rem;
+}
+
+.visualCard,
+.visualCardAlt {
+  position: relative;
+  min-height: 13rem;
+  padding: 1.5rem;
+  border-radius: 1.75rem;
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.visualCard {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 34%),
+    linear-gradient(135deg, #1f1f1f 0%, #3b2a22 65%, #e85d2c 100%);
+}
+
+.visualCardAlt {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.25), transparent 36%),
+    linear-gradient(135deg, #e85d2c 0%, #ef8d66 46%, #1f1f1f 100%);
+}
+
+.visual span,
+.visual strong {
+  display: block;
+}
+
+.visual span {
+  font-size: 0.92rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.visual strong {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.1rem;
+  font-size: 4rem;
+  letter-spacing: -0.06em;
+}
+
+@media (max-width: 991px) {
+  .section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .facts {
+    grid-template-columns: 1fr;
+  }
+}

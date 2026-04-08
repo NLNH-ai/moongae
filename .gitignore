@@ -1,0 +1,9 @@
+frontend/node_modules/
+frontend/dist/
+backend/.gradle/
+backend/build/
+*.log
+.DS_Store
+.idea/
+.vscode/
+.tmp-*/

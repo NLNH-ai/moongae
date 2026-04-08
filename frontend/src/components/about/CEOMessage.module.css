@@ -1,0 +1,50 @@
+.section {
+  position: relative;
+  padding: 2rem;
+  border-radius: 1.75rem;
+  background:
+    linear-gradient(135deg, rgba(232, 93, 44, 0.08), rgba(255, 255, 255, 0.96)),
+    #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.quoteMark {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  color: rgba(232, 93, 44, 0.18);
+  font-size: 7rem;
+  line-height: 1;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  margin: 1rem 0 0;
+  font-size: 2rem;
+}
+
+.quote {
+  max-width: 40rem;
+  margin: 1rem 0 0;
+  color: var(--color-text);
+  font-size: 1.15rem;
+  line-height: 1.9;
+}
+
+.name {
+  margin: 1.25rem 0 0;
+  font-weight: 700;
+}
+
+.link {
+  display: inline-flex;
+  margin-top: 1.2rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: 999px;
+  color: #ffffff;
+  background-color: var(--color-primary);
+}

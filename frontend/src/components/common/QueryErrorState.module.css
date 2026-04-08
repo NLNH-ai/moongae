@@ -1,0 +1,42 @@
+.wrapper {
+  display: grid;
+  gap: 0.9rem;
+  padding: 2rem;
+  border: 1px solid rgba(232, 93, 44, 0.18);
+  border-radius: var(--radius-large);
+  background: linear-gradient(180deg, rgba(255, 245, 240, 0.96), #ffffff);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.button {
+  width: fit-content;
+  padding: 0.85rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--color-primary);
+  transition: background-color var(--transition-default);
+}
+
+.button:hover {
+  background: var(--color-primary-dark);
+}

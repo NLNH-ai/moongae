@@ -1,0 +1,11 @@
+.page {
+  overflow: hidden;
+}
+
+.heroSkeleton {
+  padding-top: 6.5rem;
+}
+
+.sectionBlock {
+  position: relative;
+}
