@@ -1,0 +1,548 @@
+.loginShell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(232, 93, 44, 0.18), transparent 32%),
+    linear-gradient(180deg, #f7f3ee 0%, #ffffff 42%, #f3f3f3 100%);
+}
+
+.loginCard {
+  width: min(100%, 28rem);
+  padding: 2.25rem;
+  border-radius: 1.75rem;
+  background-color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.loginEyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.loginTitle {
+  margin: 1rem 0 0;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.loginLead {
+  margin: 1rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.loginForm {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-weight: 700;
+}
+
+.field input {
+  min-height: 3.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: rgba(232, 93, 44, 0.48);
+  box-shadow: 0 0 0 4px rgba(232, 93, 44, 0.08);
+}
+
+.primaryButton,
+.ghostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 3.15rem;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.primaryButton {
+  width: 100%;
+  color: #ffffff;
+  background-color: var(--color-primary);
+}
+
+.primaryButton:disabled {
+  opacity: 0.7;
+}
+
+.ghostButton {
+  color: var(--color-text);
+  background-color: #ffffff;
+  border-color: var(--color-border);
+}
+
+.error {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  color: #8c2a18;
+  background-color: rgba(232, 93, 44, 0.12);
+}
+
+.helper {
+  margin-top: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.metricCard {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.35rem;
+  background-color: var(--color-surface-subtle);
+}
+
+.metricLabel {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.metricMeta {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.surface {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.35rem;
+  background-color: var(--color-surface-subtle);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.sectionLead {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background-color: #ffffff;
+}
+
+.itemTitle {
+  font-weight: 700;
+}
+
+.itemMeta {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.badge,
+.badgeMuted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 4.75rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.badge {
+  color: #ffffff;
+  background-color: var(--color-primary);
+}
+
+.badgeMuted {
+  color: var(--color-text-muted);
+  background-color: rgba(26, 26, 26, 0.08);
+}
+
+.tableWrap {
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 1rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cellTitle {
+  font-weight: 700;
+}
+
+.cellSubtle {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.tabRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tabButton {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.tabActive {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.formGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fieldLabel {
+  font-weight: 700;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  min-height: 3.1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background-color: #ffffff;
+  color: var(--color-text);
+}
+
+.textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.editorWrap :global(.ql-toolbar.ql-snow),
+.editorWrap :global(.ql-container.ql-snow) {
+  border-color: var(--color-border);
+}
+
+.editorWrap :global(.ql-toolbar.ql-snow) {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.editorWrap :global(.ql-container.ql-snow) {
+  min-height: 14rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  background-color: #ffffff;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background-color: var(--color-surface-subtle);
+}
+
+.toggleLabel {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.toggleHelper {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.switch {
+  position: relative;
+  width: 3.5rem;
+  height: 2rem;
+  border-radius: 999px;
+  background-color: rgba(26, 26, 26, 0.16);
+  transition: background-color var(--transition-default);
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.switch::after {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(15, 15, 15, 0.12);
+  content: '';
+  transition: transform var(--transition-default);
+}
+
+.switchActive {
+  background-color: var(--color-primary);
+}
+
+.switchActive::after {
+  transform: translateX(1.5rem);
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.15rem;
+  padding: 0.9rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background-color: #8c2a18;
+  font-weight: 700;
+}
+
+.dragHint {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: grab;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background-color: #ffffff;
+  font-weight: 700;
+}
+
+.inlineField {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.inlineInput,
+.inlineTextarea {
+  width: 100%;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  background-color: var(--color-surface-subtle);
+}
+
+.inlineTextarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.statusDot {
+  display: inline-flex;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  background-color: currentColor;
+}
+
+.contentGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.contentCard {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background-color: #ffffff;
+}
+
+.contentHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.contentTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.contentBody {
+  margin: 0.85rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.small {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.emptyState {
+  padding: 2rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 1.25rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 991px) {
+  .metrics,
+  .gridTwo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .loginShell {
+    padding: 1rem;
+  }
+
+  .loginCard {
+    padding: 1.5rem;
+  }
+
+  .table th,
+  .table td {
+    padding-inline: 0.55rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}

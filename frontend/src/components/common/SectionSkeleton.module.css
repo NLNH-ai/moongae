@@ -1,0 +1,109 @@
+.hero,
+.timelineCard,
+.businessCard {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), #f2f2f2);
+}
+
+.hero::after,
+.timelineCard::after,
+.businessCard::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+  content: '';
+}
+
+.hero {
+  display: grid;
+  gap: 1rem;
+  min-height: 28rem;
+  padding: 3rem;
+  border-radius: 2rem;
+}
+
+.timelineGrid,
+.cardGrid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.timelineCard,
+.businessCard {
+  display: grid;
+  gap: 0.9rem;
+  padding: 2rem;
+  border-radius: 1.75rem;
+}
+
+.timelineGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cardGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shimmer,
+.shimmerLine,
+.shimmerLineWide,
+.shimmerBody {
+  display: block;
+  height: 0.95rem;
+  border-radius: 999px;
+  background-color: rgba(26, 26, 26, 0.07);
+}
+
+.shimmer {
+  width: 22%;
+  height: 3rem;
+}
+
+.shimmerLine {
+  width: 38%;
+}
+
+.shimmerLineWide {
+  width: 68%;
+}
+
+.shimmerBody {
+  width: 100%;
+  height: 5.5rem;
+  border-radius: 1rem;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1199px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .timelineGrid,
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: 22rem;
+    padding: 2rem;
+  }
+}

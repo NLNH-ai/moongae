@@ -1,0 +1,19 @@
+.page {
+  padding: 8rem 0 6rem;
+}
+
+.hero {
+  padding: 3rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(135deg, rgba(232, 93, 44, 0.14), rgba(255, 255, 255, 0.92)),
+    linear-gradient(180deg, #fff7f3 0%, #ffffff 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.body {
+  padding: 2.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
