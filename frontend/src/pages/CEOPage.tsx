@@ -5,7 +5,7 @@ import { getCompanyProfile } from '../api/public'
 import PageTransition from '../components/common/PageTransition'
 import QueryErrorState from '../components/common/QueryErrorState'
 import SectionSkeleton from '../components/common/SectionSkeleton'
-import { formatKoreanDate } from '../utils/formatters'
+import { formatKoreanDate, formatPageTitle } from '../utils/formatters'
 import styles from './Subpage.module.css'
 
 const commitments = [
@@ -35,7 +35,7 @@ function CEOPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>CEO 인사말 | Hanwha Next</title>
+        <title>{formatPageTitle('CEO 인사말')}</title>
         <meta
           content="한화넥스트 CEO 인사말과 기업의 운영 철학, 리더십 방향을 소개합니다."
           name="description"

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { BRAND_NAME } from '../../config/branding'
 import styles from './Header.module.css'
 
 interface MenuChild {
@@ -77,8 +78,11 @@ function Header() {
     <header className={`${styles.header} ${scrolled ? styles.headerSolid : ''}`}>
       <div className={`${styles.inner} container`}>
         <Link className={styles.logo} data-testid="site-logo" to="/">
-          <span className={styles.logoMark}>H</span>
-          <span className={styles.logoText}>Hanwha Next</span>
+          <span aria-hidden="true" className={styles.logoMark}>
+            <span className={styles.logoCore} />
+            <span className={styles.logoAccent} />
+          </span>
+          <span className={styles.logoText}>{BRAND_NAME}</span>
         </Link>
 
         <button

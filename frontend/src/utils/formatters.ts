@@ -1,8 +1,10 @@
+import { BRAND_NAME } from '../config/branding'
+
 export function formatMonth(month: number) {
   return `${String(month).padStart(2, '0')}\uc6d4`
 }
 
-export function formatPageTitle(title: string, suffix = 'Hanwha Next') {
+export function formatPageTitle(title: string, suffix = BRAND_NAME) {
   return `${title} | ${suffix}`
 }
 

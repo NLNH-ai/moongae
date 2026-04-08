@@ -9,6 +9,7 @@ import OrgChart from '../components/about/OrgChart'
 import PageTransition from '../components/common/PageTransition'
 import QueryErrorState from '../components/common/QueryErrorState'
 import SectionSkeleton from '../components/common/SectionSkeleton'
+import { formatPageTitle } from '../utils/formatters'
 import styles from './Subpage.module.css'
 
 const values = [
@@ -49,7 +50,7 @@ function AboutPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>About | Hanwha Next</title>
+        <title>{formatPageTitle('About')}</title>
         <meta
           content="한화넥스트의 기업 소개, 비전, 핵심 가치와 조직 운영 방향을 확인할 수 있는 그룹소개 페이지입니다."
           name="description"

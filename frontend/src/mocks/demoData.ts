@@ -5,19 +5,20 @@ import type {
   PageContentItem,
   PageKey,
 } from '../types/domain'
+import { BRAND_EMAIL, BRAND_NAME } from '../config/branding'
 
 const timestamp = '2026-04-08T12:00:00'
 
 export const demoCompanyProfile: CompanyProfile = {
   id: 1,
-  companyName: 'Hanwha Next',
+  companyName: BRAND_NAME,
   ceoName: 'Kim Dohyun',
   establishedDate: '1998-04-08',
   address: '110 Sejong-daero, Jung-gu, Seoul',
   phone: '+82-2-1234-5678',
-  email: 'contact@hanwha-next.com',
+  email: BRAND_EMAIL,
   description:
-    'Hanwha Next connects energy transition, manufacturing operations, and digital execution into one integrated operating model.',
+    'This is a temporary company profile placeholder for the preview build and can be replaced with the official brand story later.',
   logoUrl: null,
   createdAt: timestamp,
   updatedAt: timestamp,
@@ -46,7 +47,7 @@ export const demoHistoryGroups: HistoryGroup[] = [
         month: 1,
         title: 'Corporate brand renewal',
         description:
-          'Hanwha Next introduced a renewed brand system focused on clarity, execution, and scalable industrial growth.',
+          'The company introduced a renewed brand system focused on clarity, execution, and scalable industrial growth.',
         imageUrl: null,
         displayOrder: 2,
         isActive: true,
@@ -155,7 +156,7 @@ export const demoPageContents: PageContentItem[] = [
     sectionKey: 'intro',
     title: 'An integrated company built around execution',
     content:
-      'Hanwha Next aligns industrial technology, operational planning, and delivery systems so customers can move faster with less friction.',
+      'The company aligns industrial technology, operational planning, and delivery systems so customers can move faster with less friction.',
     imageUrl: null,
     displayOrder: 1,
     isActive: true,

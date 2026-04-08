@@ -1,4 +1,5 @@
 import type { CompanyProfile, PageContentItem } from '../../types/domain'
+import { BRAND_NAME, resolveBrandName } from '../../config/branding'
 import { formatKoreanDate } from '../../utils/formatters'
 import styles from './CompanyIntro.module.css'
 
@@ -8,7 +9,7 @@ interface CompanyIntroProps {
 }
 
 const fallbackBody =
-  '\ud55c\ud654\ub125\uc2a4\ud2b8\ub294 \uc0b0\uc5c5 \ud604\uc7a5\uc758 \uc5d0\ub108\uc9c0 \uc804\ud658, \uc81c\uc870 \ud601\uc2e0, \ub514\uc9c0\ud138 \uc6b4\uc601 \uccb4\uacc4\ub97c \ud558\ub098\ub85c \uc5f0\uacb0\ud558\ub294 \ud1b5\ud569 \uae30\uc5c5\uc785\ub2c8\ub2e4.'
+  'A temporary company introduction placeholder that can be replaced with your official brand story later.'
 
 function CompanyIntro({ company, introContent }: CompanyIntroProps) {
   return (
@@ -24,7 +25,7 @@ function CompanyIntro({ company, introContent }: CompanyIntroProps) {
         <dl className={styles.facts}>
           <div>
             <dt>{'\ud68c\uc0ac\uba85'}</dt>
-            <dd>{company?.companyName ?? 'Hanwha Next'}</dd>
+            <dd>{resolveBrandName(company?.companyName ?? BRAND_NAME)}</dd>
           </div>
           <div>
             <dt>{'\ub300\ud45c\uc790'}</dt>

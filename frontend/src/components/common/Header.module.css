@@ -32,13 +32,34 @@
 }
 
 .logoMark {
+  position: relative;
   display: grid;
   width: 2.3rem;
   height: 2.3rem;
   place-items: center;
   border-radius: 999px;
-  color: #ffffff;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--color-primary), #ff8c52);
+}
+
+.logoCore {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  background-color: #ffffff;
+  opacity: 0.96;
+}
+
+.logoAccent {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.4rem;
+  width: 0.95rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: rotate(-38deg);
+  transform-origin: center;
 }
 
 .logoText {

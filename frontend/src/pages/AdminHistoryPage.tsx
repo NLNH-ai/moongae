@@ -25,7 +25,7 @@ import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
 import { useToast } from '../components/common/toast-context'
 import { getErrorMessage } from '../utils/errors'
-import { formatMonth } from '../utils/formatters'
+import { formatMonth, formatPageTitle } from '../utils/formatters'
 import { flattenHistoryGroups, toHistoryGroups } from '../utils/helpers'
 import styles from './AdminScreens.module.css'
 
@@ -403,7 +403,7 @@ function AdminHistoryPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>연혁 관리 | Hanwha Next</title>
+        <title>{formatPageTitle('연혁 관리')}</title>
         <meta content="한화넥스트 관리자 연혁 관리 페이지입니다." name="description" />
       </Helmet>
       <section className={styles.loginShell} style={{ minHeight: 'auto', paddingTop: '7rem' }}>

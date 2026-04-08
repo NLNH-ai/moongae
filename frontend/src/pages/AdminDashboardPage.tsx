@@ -6,7 +6,7 @@ import { getBusinessAreas, getHistoryGroups, getPageContents } from '../api/publ
 import AdminLayout from '../components/admin/AdminLayout'
 import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
-import { formatKoreanDate } from '../utils/formatters'
+import { formatKoreanDate, formatPageTitle } from '../utils/formatters'
 import { flattenHistoryGroups } from '../utils/helpers'
 import styles from './AdminScreens.module.css'
 
@@ -93,7 +93,7 @@ function AdminDashboardPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>관리자 대시보드 | Hanwha Next</title>
+        <title>{formatPageTitle('관리자 대시보드')}</title>
         <meta
           content="한화넥스트 관리자 대시보드에서 사이트 콘텐츠 현황을 요약해 확인할 수 있습니다."
           name="description"

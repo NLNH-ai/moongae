@@ -12,6 +12,7 @@ import SectionSkeleton from '../components/common/SectionSkeleton'
 import BusinessOverview from '../components/home/BusinessOverview'
 import HeroSection from '../components/home/HeroSection'
 import HistoryTimeline from '../components/home/HistoryTimeline'
+import { BRAND_NAME, resolveBrandName } from '../config/branding'
 import styles from './HomePage.module.css'
 
 const historySectionTitle = '\uc5f0\ud601'
@@ -49,7 +50,7 @@ function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Hanwha Next</title>
+        <title>{BRAND_NAME}</title>
       </Helmet>
       <div className={styles.page} data-testid="home-page">
         {heroQuery.isLoading && !heroQuery.data ? (
@@ -58,7 +59,7 @@ function HomePage() {
           </div>
         ) : (
           <HeroSection
-            companyName={companyQuery.data?.companyName}
+            companyName={resolveBrandName(companyQuery.data?.companyName)}
             heroContent={heroQuery.data}
           />
         )}

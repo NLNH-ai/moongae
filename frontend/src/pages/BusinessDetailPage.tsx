@@ -7,7 +7,7 @@ import BusinessCard from '../components/business/BusinessCard'
 import PageTransition from '../components/common/PageTransition'
 import QueryErrorState from '../components/common/QueryErrorState'
 import SectionSkeleton from '../components/common/SectionSkeleton'
-import { formatKoreanDate } from '../utils/formatters'
+import { formatKoreanDate, formatPageTitle } from '../utils/formatters'
 import styles from './Subpage.module.css'
 
 function BusinessDetailPage() {
@@ -60,7 +60,7 @@ function BusinessDetailPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>{detail ? `${detail.title} | Hanwha Next` : '사업 상세 | Hanwha Next'}</title>
+        <title>{formatPageTitle(detail ? detail.title : '사업 상세')}</title>
         <meta
           content={
             detail

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { publicQueryKeys } from '../../api/queryKeys'
 import { getCompanyProfile } from '../../api/public'
+import { resolveBrandEmail, resolveBrandName } from '../../config/branding'
 import styles from './Footer.module.css'
 
 const fallbackAddress =
@@ -13,10 +14,10 @@ function Footer() {
     staleTime: 1000 * 60 * 5,
   })
 
-  const companyName = data?.companyName ?? 'Hanwha Next'
+  const companyName = resolveBrandName(data?.companyName)
   const address = data?.address ?? fallbackAddress
   const phone = data?.phone ?? '02-1234-5678'
-  const email = data?.email ?? 'contact@hanwha-next.co.kr'
+  const email = resolveBrandEmail(data?.email)
 
   return (
     <footer className={styles.footer}>

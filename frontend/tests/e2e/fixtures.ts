@@ -25,12 +25,12 @@ function respond<T>(route: Route, data: T, message = 'ok') {
 export function publicFixtureData() {
   const company = {
     id: 1,
-    companyName: 'Hanwha Next',
+    companyName: 'COMPANY LOGO',
     ceoName: 'Kim Dohyun',
     establishedDate: '1998-04-08',
     address: 'Seoul, Korea',
     phone: '02-1234-5678',
-    email: 'contact@hanwha-next.co.kr',
+    email: 'contact@example.com',
     description: 'Integrated industrial platform company.',
     logoUrl: null,
     createdAt: '2026-04-08T12:00:00',

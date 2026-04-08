@@ -6,6 +6,7 @@ import { getBusinessAreas, getPageSection } from '../api/public'
 import PageTransition from '../components/common/PageTransition'
 import QueryErrorState from '../components/common/QueryErrorState'
 import SectionSkeleton from '../components/common/SectionSkeleton'
+import { formatPageTitle } from '../utils/formatters'
 import { trimText } from '../utils/helpers'
 import shellStyles from './Subpage.module.css'
 import styles from './BusinessPage.module.css'
@@ -26,7 +27,7 @@ function BusinessPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>사업분야 | Hanwha Next</title>
+        <title>{formatPageTitle('사업분야')}</title>
         <meta
           content="한화넥스트의 핵심 사업분야와 통합 운영 역량을 확인할 수 있는 사업분야 페이지입니다."
           name="description"

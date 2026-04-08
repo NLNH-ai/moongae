@@ -6,7 +6,7 @@ import { getHistoryGroups } from '../api/public'
 import PageTransition from '../components/common/PageTransition'
 import QueryErrorState from '../components/common/QueryErrorState'
 import SectionSkeleton from '../components/common/SectionSkeleton'
-import { formatMonth, getDecadeLabel } from '../utils/formatters'
+import { formatMonth, formatPageTitle, getDecadeLabel } from '../utils/formatters'
 import { flattenHistoryGroups, groupHistoryByYear } from '../utils/helpers'
 import styles from './Subpage.module.css'
 
@@ -35,7 +35,7 @@ function HistoryPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>기업 연혁 | Hanwha Next</title>
+        <title>{formatPageTitle('기업 연혁')}</title>
         <meta
           content="한화넥스트의 주요 성장 이력과 변화의 순간을 연도별로 확인할 수 있는 연혁 페이지입니다."
           name="description"

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { loginAdmin } from '../api/admin'
 import PageTransition from '../components/common/PageTransition'
+import { BRAND_NAME } from '../config/branding'
 import { isDemoMode } from '../config/runtime'
 import { hasAdminToken, setAdminToken } from '../utils/auth'
 import styles from './AdminScreens.module.css'
@@ -55,8 +56,8 @@ function AdminLoginPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>Admin Login | Hanwha Next</title>
-        <meta content="Hanwha Next admin login page." name="description" />
+        <title>{`Admin Login | ${BRAND_NAME}`}</title>
+        <meta content={`${BRAND_NAME} admin login page.`} name="description" />
       </Helmet>
       <section className={styles.loginShell}>
         <div className={styles.loginCard}>

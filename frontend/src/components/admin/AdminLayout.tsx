@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { BRAND_NAME } from '../../config/branding'
 import { clearAdminToken } from '../../utils/auth'
 import styles from './AdminLayout.module.css'
 
@@ -27,7 +28,7 @@ function AdminLayout({
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div>
-          <p className={styles.logo}>Hanwha Next</p>
+          <p className={styles.logo}>{BRAND_NAME}</p>
           <p className={styles.caption}>{'\uad00\ub9ac\uc790 \ucf58\uc194'}</p>
         </div>
         <nav className={styles.nav}>

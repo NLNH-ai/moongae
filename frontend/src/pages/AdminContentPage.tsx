@@ -16,6 +16,7 @@ import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
 import { useToast } from '../components/common/toast-context'
 import { getErrorMessage } from '../utils/errors'
+import { formatPageTitle } from '../utils/formatters'
 import styles from './AdminScreens.module.css'
 
 const pageKeys: PageKey[] = ['HOME', 'ABOUT', 'BUSINESS', 'CONTACT']
@@ -149,7 +150,7 @@ function AdminContentPage() {
   return (
     <PageTransition>
       <Helmet>
-        <title>콘텐츠 관리 | Hanwha Next</title>
+        <title>{formatPageTitle('콘텐츠 관리')}</title>
         <meta content="한화넥스트 관리자 콘텐츠 관리 페이지입니다." name="description" />
       </Helmet>
       <section className={styles.loginShell} style={{ minHeight: 'auto', paddingTop: '7rem' }}>
