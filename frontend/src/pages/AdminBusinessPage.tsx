@@ -11,12 +11,12 @@ import {
   createBusiness,
   deleteBusiness,
   deleteUpload,
+  getAdminBusinessAreas,
   getAdminMe,
   updateBusiness,
   uploadImage,
 } from '../api/admin'
 import { publicQueryKeys } from '../api/queryKeys'
-import { getBusinessAreas } from '../api/public'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import Modal from '../components/common/Modal'
@@ -296,7 +296,7 @@ function AdminBusinessPage() {
 
   const businessQuery = useQuery({
     queryKey: publicQueryKeys.business,
-    queryFn: getBusinessAreas,
+    queryFn: getAdminBusinessAreas,
   })
 
   const items = [...(businessQuery.data ?? [])].sort(

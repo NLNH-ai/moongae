@@ -11,13 +11,13 @@ import {
   createHistory,
   deleteHistory,
   deleteUpload,
+  getAdminHistoryGroups,
   getAdminMe,
   updateHistory,
   updateHistoryOrder,
   uploadImage,
 } from '../api/admin'
 import { publicQueryKeys } from '../api/queryKeys'
-import { getHistoryGroups } from '../api/public'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import Modal from '../components/common/Modal'
@@ -285,7 +285,7 @@ function AdminHistoryPage() {
 
   const historyQuery = useQuery({
     queryKey: publicQueryKeys.history,
-    queryFn: getHistoryGroups,
+    queryFn: getAdminHistoryGroups,
   })
 
   const entries = flattenHistoryGroups(historyQuery.data ?? []).sort(

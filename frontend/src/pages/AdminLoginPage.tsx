@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useState, type FormEvent } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { loginAdmin } from '../api/admin'
+import { DEMO_ADMIN_CREDENTIALS, loginAdmin } from '../api/admin'
 import PageTransition from '../components/common/PageTransition'
 import { BRAND_NAME } from '../config/branding'
 import { isDemoMode } from '../config/runtime'
@@ -11,8 +11,12 @@ import styles from './AdminScreens.module.css'
 
 function AdminLoginPage() {
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState(
+    isDemoMode ? DEMO_ADMIN_CREDENTIALS.username : '',
+  )
+  const [password, setPassword] = useState(
+    isDemoMode ? DEMO_ADMIN_CREDENTIALS.password : '',
+  )
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -24,12 +28,6 @@ function AdminLoginPage() {
     event.preventDefault()
     setSubmitting(true)
     setError('')
-
-    if (isDemoMode) {
-      setError('Admin login is disabled in the GitHub Pages preview build.')
-      setSubmitting(false)
-      return
-    }
 
     try {
       const response = await loginAdmin({
@@ -45,6 +43,8 @@ function AdminLoginPage() {
           submitError.response?.data?.message ??
             'Login failed. Check the account credentials and try again.',
         )
+      } else if (submitError instanceof Error) {
+        setError(submitError.message)
       } else {
         setError('A problem occurred while logging in.')
       }
@@ -69,8 +69,8 @@ function AdminLoginPage() {
           </p>
           {isDemoMode ? (
             <div className={styles.helper}>
-              GitHub Pages preview uses demo data for public pages only. Admin APIs are
-              disabled in this build.
+              Preview login is enabled with demo data. Use{' '}
+              {DEMO_ADMIN_CREDENTIALS.username} / {DEMO_ADMIN_CREDENTIALS.password}.
             </div>
           ) : null}
           <form

@@ -7,9 +7,14 @@ import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import type { ContentUpdatePayload } from '../types/admin'
 import type { PageContentItem, PageKey } from '../types/domain'
-import { deleteUpload, getAdminMe, updateContent, uploadImage } from '../api/admin'
+import {
+  deleteUpload,
+  getAdminMe,
+  getAdminPageContents,
+  updateContent,
+  uploadImage,
+} from '../api/admin'
 import { publicQueryKeys } from '../api/queryKeys'
-import { getPageContents } from '../api/public'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import PageTransition from '../components/common/PageTransition'
@@ -38,7 +43,7 @@ function AdminContentPage() {
 
   const contentQuery = useQuery({
     queryKey: publicQueryKeys.pageContents(selectedPage),
-    queryFn: () => getPageContents(selectedPage),
+    queryFn: () => getAdminPageContents(selectedPage),
   })
 
   const saveMutation = useMutation({

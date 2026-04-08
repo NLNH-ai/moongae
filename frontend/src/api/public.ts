@@ -8,20 +8,18 @@ import type {
 } from '../types/domain'
 import { isDemoMode } from '../config/runtime'
 import {
-  demoBusinessAreas,
-  demoCompanyProfile,
-  demoHistoryGroups,
+  getDemoBusinessArea,
+  getDemoBusinessAreas,
+  getDemoCompanyProfile,
+  getDemoHistoryGroups,
   getDemoPageContents,
-} from '../mocks/demoData'
+  getDemoPageSection,
+} from '../mocks/demoCmsStore'
 import { apiClient } from './client'
-
-function cloneDemoData<T>(value: T): T {
-  return structuredClone(value)
-}
 
 export async function getCompanyProfile() {
   if (isDemoMode) {
-    return cloneDemoData(demoCompanyProfile)
+    return getDemoCompanyProfile()
   }
 
   const { data } = await apiClient.get<ApiResponse<CompanyProfile>>('/company')
@@ -30,7 +28,7 @@ export async function getCompanyProfile() {
 
 export async function getHistoryGroups() {
   if (isDemoMode) {
-    return cloneDemoData(demoHistoryGroups)
+    return getDemoHistoryGroups()
   }
 
   const { data } = await apiClient.get<ApiResponse<HistoryGroup[]>>('/history')
@@ -39,7 +37,7 @@ export async function getHistoryGroups() {
 
 export async function getBusinessAreas() {
   if (isDemoMode) {
-    return cloneDemoData(demoBusinessAreas)
+    return getDemoBusinessAreas()
   }
 
   const { data } = await apiClient.get<ApiResponse<BusinessAreaItem[]>>(
@@ -50,15 +48,7 @@ export async function getBusinessAreas() {
 
 export async function getBusinessArea(id: number | string) {
   if (isDemoMode) {
-    const item = demoBusinessAreas.find(
-      (businessArea) => String(businessArea.id) === String(id),
-    )
-
-    if (!item) {
-      throw new Error(`Missing demo business area: ${id}`)
-    }
-
-    return cloneDemoData(item)
+    return getDemoBusinessArea(id)
   }
 
   const { data } = await apiClient.get<ApiResponse<BusinessAreaItem>>(
@@ -69,7 +59,7 @@ export async function getBusinessArea(id: number | string) {
 
 export async function getPageContents(pageKey: PageKey) {
   if (isDemoMode) {
-    return cloneDemoData(getDemoPageContents(pageKey))
+    return getDemoPageContents(pageKey)
   }
 
   const { data } = await apiClient.get<ApiResponse<PageContentItem[]>>(
@@ -80,15 +70,7 @@ export async function getPageContents(pageKey: PageKey) {
 
 export async function getPageSection(pageKey: PageKey, sectionKey: string) {
   if (isDemoMode) {
-    const item = getDemoPageContents(pageKey).find(
-      (pageContent) => pageContent.sectionKey === sectionKey,
-    )
-
-    if (!item) {
-      throw new Error(`Missing demo page section: ${pageKey}/${sectionKey}`)
-    }
-
-    return cloneDemoData(item)
+    return getDemoPageSection(pageKey, sectionKey)
   }
 
   const { data } = await apiClient.get<ApiResponse<PageContentItem>>(

@@ -1,8 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
-import { getAdminMe } from '../api/admin'
+import {
+  getAdminBusinessAreas,
+  getAdminHistoryGroups,
+  getAdminMe,
+  getAdminPageContents,
+} from '../api/admin'
 import { publicQueryKeys } from '../api/queryKeys'
-import { getBusinessAreas, getHistoryGroups, getPageContents } from '../api/public'
 import AdminLayout from '../components/admin/AdminLayout'
 import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
@@ -18,32 +22,32 @@ function AdminDashboardPage() {
 
   const historyQuery = useQuery({
     queryKey: publicQueryKeys.history,
-    queryFn: getHistoryGroups,
+    queryFn: getAdminHistoryGroups,
   })
 
   const businessQuery = useQuery({
     queryKey: publicQueryKeys.business,
-    queryFn: getBusinessAreas,
+    queryFn: getAdminBusinessAreas,
   })
 
   const homeContentQuery = useQuery({
     queryKey: publicQueryKeys.pageContents('HOME'),
-    queryFn: () => getPageContents('HOME'),
+    queryFn: () => getAdminPageContents('HOME'),
   })
 
   const aboutContentQuery = useQuery({
     queryKey: publicQueryKeys.pageContents('ABOUT'),
-    queryFn: () => getPageContents('ABOUT'),
+    queryFn: () => getAdminPageContents('ABOUT'),
   })
 
   const businessContentQuery = useQuery({
     queryKey: publicQueryKeys.pageContents('BUSINESS'),
-    queryFn: () => getPageContents('BUSINESS'),
+    queryFn: () => getAdminPageContents('BUSINESS'),
   })
 
   const contactContentQuery = useQuery({
     queryKey: publicQueryKeys.pageContents('CONTACT'),
-    queryFn: () => getPageContents('CONTACT'),
+    queryFn: () => getAdminPageContents('CONTACT'),
   })
 
   const historyEntries = flattenHistoryGroups(historyQuery.data ?? [])
