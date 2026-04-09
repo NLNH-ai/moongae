@@ -185,19 +185,29 @@
 
   .mobilePanel {
     position: fixed;
-    inset: 0 0 0 auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
     z-index: 62;
     display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
     width: min(24rem, 84vw);
+    max-width: calc(100vw - 1rem);
+    height: 100dvh;
     padding: 1.25rem;
     background-color: #ffffff;
     box-shadow: -20px 0 50px rgba(26, 26, 26, 0.12);
     transform: translateX(100%);
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
     transition: transform var(--transition-default);
   }
 
   .mobilePanelOpen {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .mobileHeader {
@@ -217,7 +227,12 @@
   .mobileMenu {
     display: grid;
     gap: 1.2rem;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding-top: 1.2rem;
+    padding-right: 0.25rem;
+    align-content: start;
   }
 
   .mobileItem {
