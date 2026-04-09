@@ -3,7 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import type { HistoryUpsertPayload } from '../types/admin'
 import type { HistoryEntry } from '../types/domain'
@@ -25,8 +25,12 @@ import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
 import { useToast } from '../components/common/toast-context'
 import { getErrorMessage } from '../utils/errors'
-import { formatMonth, formatPageTitle } from '../utils/formatters'
-import { flattenHistoryGroups, toHistoryGroups } from '../utils/helpers'
+import {
+  formatKoreanDate,
+  formatMonth,
+  formatPageTitle,
+} from '../utils/formatters'
+import { flattenHistoryGroups, toHistoryGroups, trimText } from '../utils/helpers'
 import styles from './AdminScreens.module.css'
 
 interface HistoryEditorFormProps {
@@ -35,6 +39,14 @@ interface HistoryEditorFormProps {
   nextOrder: number
   onCancel: () => void
   onSubmit: (payload: HistoryUpsertPayload) => Promise<void> | void
+}
+
+function getRateLabel(activeCount: number, totalCount: number) {
+  if (totalCount === 0) {
+    return '0%'
+  }
+
+  return `${Math.round((activeCount / totalCount) * 100)}%`
 }
 
 function HistoryEditorForm({
@@ -68,13 +80,16 @@ function HistoryEditorForm({
       }))
       setUploadedImageId(uploaded.id)
       showToast({
-        title: '이미지 업로드 완료',
-        description: '연혁 이미지가 업로드되었습니다.',
+        title: 'Image uploaded',
+        description: 'The timeline image was added to the entry.',
       })
     } catch (error) {
       showToast({
-        title: '이미지 업로드 실패',
-        description: getErrorMessage(error, '이미지 업로드 중 문제가 발생했습니다.'),
+        title: 'Upload failed',
+        description: getErrorMessage(
+          error,
+          'A problem occurred while uploading the image.',
+        ),
         variant: 'error',
       })
     } finally {
@@ -109,7 +124,7 @@ function HistoryEditorForm({
       <div className={styles.formRow}>
         <div className={styles.field}>
           <label className={styles.fieldLabel} htmlFor="history-year">
-            연도
+            Year
           </label>
           <input
             className={styles.input}
@@ -130,7 +145,7 @@ function HistoryEditorForm({
         </div>
         <div className={styles.field}>
           <label className={styles.fieldLabel} htmlFor="history-month">
-            월
+            Month
           </label>
           <select
             className={styles.select}
@@ -155,7 +170,7 @@ function HistoryEditorForm({
 
       <div className={styles.field}>
         <label className={styles.fieldLabel} htmlFor="history-title">
-          제목
+          Title
         </label>
         <input
           className={styles.input}
@@ -175,7 +190,7 @@ function HistoryEditorForm({
 
       <div className={styles.field}>
         <label className={styles.fieldLabel} htmlFor="history-description">
-          설명
+          Description
         </label>
         <textarea
           className={styles.textarea}
@@ -194,8 +209,8 @@ function HistoryEditorForm({
 
       <div className={styles.formRow}>
         <ImageUploadField
-          helper="jpg, png, gif, webp / 최대 5MB"
-          label="연혁 이미지"
+          helper="jpg, png, gif, webp / max 5MB"
+          label="Timeline image"
           onClear={handleClearImage}
           onSelect={handleUpload}
           testIdPrefix="history-image"
@@ -205,7 +220,7 @@ function HistoryEditorForm({
         <div className={styles.formGrid}>
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="history-order">
-              표시 순서
+              Display order
             </label>
             <input
               className={styles.input}
@@ -228,9 +243,9 @@ function HistoryEditorForm({
             }`}
           >
             <div className={styles.toggleLabel}>
-              <strong>활성 여부</strong>
+              <strong>Visibility</strong>
               <span className={styles.toggleHelper}>
-                비활성으로 두면 사이트에 노출되지 않습니다.
+                Hidden entries remain stored but are removed from the public site.
               </span>
             </div>
             <label
@@ -255,7 +270,7 @@ function HistoryEditorForm({
 
       <div className={styles.modalActions}>
         <button className={styles.ghostButton} onClick={onCancel} type="button">
-          취소
+          Cancel
         </button>
         <button
           className={styles.primaryButton}
@@ -263,7 +278,7 @@ function HistoryEditorForm({
           disabled={isPending}
           type="submit"
         >
-          {isPending ? '저장 중...' : '저장'}
+          {isPending ? 'Saving...' : 'Save entry'}
         </button>
       </div>
     </form>
@@ -288,24 +303,36 @@ function AdminHistoryPage() {
     queryFn: getAdminHistoryGroups,
   })
 
-  const entries = flattenHistoryGroups(historyQuery.data ?? []).sort(
-    (left, right) => left.displayOrder - right.displayOrder,
+  const yearGroups = useMemo(
+    () => [...(historyQuery.data ?? [])].sort((left, right) => right.year - left.year),
+    [historyQuery.data],
+  )
+
+  const entries = useMemo(
+    () =>
+      flattenHistoryGroups(yearGroups).sort(
+        (left, right) => left.displayOrder - right.displayOrder,
+      ),
+    [yearGroups],
   )
 
   const createMutation = useMutation({
     mutationFn: createHistory,
     onSuccess: async () => {
       showToast({
-        title: '연혁 등록 완료',
-        description: '새 연혁 항목이 추가되었습니다.',
+        title: 'Entry created',
+        description: 'The history timeline was updated successfully.',
       })
       setIsCreateOpen(false)
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
       showToast({
-        title: '연혁 등록 실패',
-        description: getErrorMessage(error, '연혁 등록 중 문제가 발생했습니다.'),
+        title: 'Create failed',
+        description: getErrorMessage(
+          error,
+          'A problem occurred while creating the history entry.',
+        ),
         variant: 'error',
       })
     },
@@ -316,16 +343,19 @@ function AdminHistoryPage() {
       updateHistory(id, payload),
     onSuccess: async () => {
       showToast({
-        title: '연혁 수정 완료',
-        description: '연혁 항목이 업데이트되었습니다.',
+        title: 'Entry updated',
+        description: 'The selected timeline record is now live.',
       })
       setEditingItem(null)
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
       showToast({
-        title: '연혁 수정 실패',
-        description: getErrorMessage(error, '연혁 수정 중 문제가 발생했습니다.'),
+        title: 'Update failed',
+        description: getErrorMessage(
+          error,
+          'A problem occurred while updating the history entry.',
+        ),
         variant: 'error',
       })
     },
@@ -335,16 +365,19 @@ function AdminHistoryPage() {
     mutationFn: deleteHistory,
     onSuccess: async () => {
       showToast({
-        title: '연혁 삭제 완료',
-        description: '선택한 연혁 항목이 삭제되었습니다.',
+        title: 'Entry removed',
+        description: 'The history entry was removed from the registry.',
       })
       setDeleteTarget(null)
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
       showToast({
-        title: '연혁 삭제 실패',
-        description: getErrorMessage(error, '연혁 삭제 중 문제가 발생했습니다.'),
+        title: 'Delete failed',
+        description: getErrorMessage(
+          error,
+          'A problem occurred while deleting the history entry.',
+        ),
         variant: 'error',
       })
     },
@@ -355,23 +388,33 @@ function AdminHistoryPage() {
     onSuccess: async (data) => {
       queryClient.setQueryData(publicQueryKeys.history, toHistoryGroups(data))
       showToast({
-        title: '순서 변경 완료',
-        description: '드래그앤드롭 결과가 저장되었습니다.',
+        title: 'Order updated',
+        description: 'The drag-and-drop sequence is synced to the workspace.',
       })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
       showToast({
-        title: '순서 변경 실패',
-        description: getErrorMessage(error, '연혁 순서 저장 중 문제가 발생했습니다.'),
+        title: 'Reorder failed',
+        description: getErrorMessage(
+          error,
+          'A problem occurred while updating the display order.',
+        ),
         variant: 'error',
       })
     },
   })
 
   const activeCount = entries.filter((entry) => entry.isActive).length
-  const latestYear =
-    entries.length > 0 ? Math.max(...entries.map((entry) => entry.year)) : 'N/A'
+  const inactiveCount = entries.length - activeCount
+  const latestYear = yearGroups[0]?.year ?? 'N/A'
+  const visibilityRate = getRateLabel(activeCount, entries.length)
+
+  const latestUpdatedEntry =
+    [...entries].sort(
+      (left, right) =>
+        new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+    )[0] ?? null
 
   const handleDrop = (targetId: number) => {
     if (!draggingId || draggingId === targetId || orderMutation.isPending) {
@@ -404,13 +447,19 @@ function AdminHistoryPage() {
     <PageTransition>
       <Helmet>
         <title>{formatPageTitle('연혁 관리')}</title>
-        <meta content="한화넥스트 관리자 연혁 관리 페이지입니다." name="description" />
+        <meta
+          content="관리자 연혁 관리 페이지입니다."
+          name="description"
+        />
       </Helmet>
-      <section className={styles.loginShell} style={{ minHeight: 'auto', paddingTop: '7rem' }}>
+      <section
+        className={styles.loginShell}
+        style={{ minHeight: 'auto', paddingTop: '7rem' }}
+      >
         <div className="container" style={{ width: 'var(--container-width)' }}>
           <AdminLayout
             adminName={adminQuery.data?.name}
-            description="연혁 데이터를 표 형식으로 관리하고 드래그앤드롭으로 순서를 변경합니다."
+            description="타임라인 기록, 공개 상태, 노출 순서를 한 화면에서 통제합니다."
             title="연혁 관리"
           >
             {historyQuery.isLoading ? (
@@ -419,106 +468,254 @@ function AdminHistoryPage() {
               <>
                 <div className={styles.metrics}>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Total Entries</span>
+                    <span className={styles.metricLabel}>History Items</span>
                     <strong className={styles.metricValue}>{entries.length}</strong>
-                    <span className={styles.metricMeta}>등록된 연혁 전체 수</span>
+                    <span className={styles.metricMeta}>
+                      전체 등록 수와 운영 대상 레코드 수
+                    </span>
                   </article>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Active Entries</span>
+                    <span className={styles.metricLabel}>Visible Records</span>
                     <strong className={styles.metricValue}>{activeCount}</strong>
-                    <span className={styles.metricMeta}>현재 노출 중인 연혁 수</span>
+                    <span className={styles.metricMeta}>
+                      현재 공개 중인 타임라인 항목 수
+                    </span>
                   </article>
                   <article className={styles.metricCard}>
                     <span className={styles.metricLabel}>Latest Year</span>
                     <strong className={styles.metricValue}>{latestYear}</strong>
-                    <span className={styles.metricMeta}>가장 최근 기준 연도</span>
+                    <span className={styles.metricMeta}>
+                      가장 최근 연혁 기준 연도
+                    </span>
+                  </article>
+                  <article className={styles.metricCard}>
+                    <span className={styles.metricLabel}>Publishing Health</span>
+                    <strong className={styles.metricValue}>{visibilityRate}</strong>
+                    <span className={styles.metricMeta}>
+                      전체 항목 중 공개 가능한 비율
+                    </span>
                   </article>
                 </div>
 
-                <section className={styles.surface} style={{ marginTop: '1rem' }}>
-                  <div className={styles.sectionHeader}>
-                    <div>
-                      <h2 className={styles.sectionTitle}>연혁 목록</h2>
-                      <p className={styles.sectionLead}>
-                        추가, 수정, 삭제와 함께 행을 끌어 순서를 변경할 수 있습니다.
-                      </p>
-                    </div>
-                    <button
-                      className={styles.primaryButton}
-                      data-testid="history-create-button"
-                      onClick={() => setIsCreateOpen(true)}
-                      type="button"
-                    >
-                      연혁 추가
-                    </button>
+                <div className={styles.workspaceGrid}>
+                  <div className={styles.workspaceMain}>
+                    <section className={styles.surface}>
+                      <div className={styles.sectionHeader}>
+                        <div>
+                          <h2 className={styles.sectionTitle}>Timeline registry</h2>
+                          <p className={styles.sectionLead}>
+                            연도별 기록을 정리하고, 드래그로 노출 순서를 바로 바꿉니다.
+                          </p>
+                        </div>
+                        <button
+                          className={styles.primaryButton}
+                          data-testid="history-create-button"
+                          onClick={() => setIsCreateOpen(true)}
+                          type="button"
+                        >
+                          Add history
+                        </button>
+                      </div>
+
+                      <div className={styles.toolbarRow}>
+                        <div className={styles.toolbarMeta}>
+                          <span className={styles.statPill}>
+                            <strong>{yearGroups.length}</strong> year clusters
+                          </span>
+                          <span className={styles.statPill}>
+                            <strong>{inactiveCount}</strong> hidden items
+                          </span>
+                          <span className={styles.statPill}>
+                            <strong>{orderMutation.isPending ? 'Saving' : 'Live'}</strong>{' '}
+                            ordering mode
+                          </span>
+                        </div>
+                        <span className={styles.tableNote}>
+                          Drag any row and drop it on another row to reorder instantly.
+                        </span>
+                      </div>
+
+                      <div className={styles.tableWrap}>
+                        <table className={styles.table}>
+                          <thead>
+                            <tr>
+                              <th />
+                              <th>Year</th>
+                              <th>Month</th>
+                              <th>Event</th>
+                              <th>Status</th>
+                              <th>Order</th>
+                              <th>Updated</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {entries.map((entry) => (
+                              <tr
+                                data-testid={`history-row-${entry.id}`}
+                                draggable={!orderMutation.isPending}
+                                key={entry.id}
+                                onDragOver={(event) => event.preventDefault()}
+                                onDragStart={() => setDraggingId(entry.id)}
+                                onDrop={() => handleDrop(entry.id)}
+                              >
+                                <td>
+                                  <span className={styles.dragHandle}>⋮⋮</span>
+                                </td>
+                                <td>{entry.year}</td>
+                                <td>{formatMonth(entry.month)}</td>
+                                <td>
+                                  <div className={styles.tableLead}>
+                                    <span className={styles.cellTitle}>{entry.title}</span>
+                                    <span className={styles.tableSubtext}>
+                                      {trimText(entry.description, 96)}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span
+                                    className={
+                                      entry.isActive ? styles.badge : styles.badgeMuted
+                                    }
+                                  >
+                                    {entry.isActive ? 'Active' : 'Hidden'}
+                                  </span>
+                                </td>
+                                <td>{entry.displayOrder}</td>
+                                <td>{formatKoreanDate(entry.updatedAt)}</td>
+                                <td>
+                                  <div className={styles.rowActions}>
+                                    <button
+                                      className={styles.actionButton}
+                                      data-testid={`history-edit-${entry.id}`}
+                                      onClick={() => setEditingItem(entry)}
+                                      type="button"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      className={styles.actionButton}
+                                      data-testid={`history-delete-${entry.id}`}
+                                      onClick={() => setDeleteTarget(entry)}
+                                      type="button"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
                   </div>
-                  <p className={styles.dragHint}>
-                    순서 변경은 왼쪽 핸들을 잡아 원하는 위치에 놓으면 바로 저장됩니다.
-                  </p>
-                  <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th />
-                          <th>Year</th>
-                          <th>Month</th>
-                          <th>Title</th>
-                          <th>Status</th>
-                          <th>Order</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {entries.map((entry) => (
-                          <tr
-                            data-testid={`history-row-${entry.id}`}
-                            draggable={!orderMutation.isPending}
-                            key={entry.id}
-                            onDragOver={(event) => event.preventDefault()}
-                            onDragStart={() => setDraggingId(entry.id)}
-                            onDrop={() => handleDrop(entry.id)}
-                          >
-                            <td>
-                              <span className={styles.dragHandle}>⋮⋮</span>
-                            </td>
-                            <td>{entry.year}</td>
-                            <td>{formatMonth(entry.month)}</td>
-                            <td>
-                              <span className={styles.cellTitle}>{entry.title}</span>
-                              <span className={styles.cellSubtle}>{entry.description}</span>
-                            </td>
-                            <td>
-                              <span className={entry.isActive ? styles.badge : styles.badgeMuted}>
-                                {entry.isActive ? 'Active' : 'Hidden'}
+
+                  <aside className={styles.workspaceSide}>
+                    <section className={styles.surface}>
+                      <div className={styles.sectionHeader}>
+                        <div>
+                          <h2 className={styles.sectionTitle}>Operational controls</h2>
+                          <p className={styles.sectionLead}>
+                            현재 게시 상태와 작업 흐름을 빠르게 점검합니다.
+                          </p>
+                        </div>
+                      </div>
+                      <div className={styles.statusGrid}>
+                        <div className={styles.statusRow}>
+                          <div>
+                            <strong>Ordering workflow</strong>
+                            <p className={styles.small}>
+                              Drag-and-drop publishing order for all rows
+                            </p>
+                          </div>
+                          <span className={styles.statusValue}>
+                            {orderMutation.isPending ? 'Saving' : 'Live'}
+                          </span>
+                        </div>
+                        <div className={styles.statusRow}>
+                          <div>
+                            <strong>Latest activity</strong>
+                            <p className={styles.small}>
+                              Most recent synced timeline update
+                            </p>
+                          </div>
+                          <span className={styles.statusValue}>
+                            {latestUpdatedEntry
+                              ? formatKoreanDate(latestUpdatedEntry.updatedAt)
+                              : 'N/A'}
+                          </span>
+                        </div>
+                        <div className={styles.statusRow}>
+                          <div>
+                            <strong>Visibility rate</strong>
+                            <p className={styles.small}>Publicly exposed record ratio</p>
+                          </div>
+                          <span className={styles.statusValue}>{visibilityRate}</span>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className={styles.surface}>
+                      <div className={styles.sectionHeader}>
+                        <div>
+                          <h2 className={styles.sectionTitle}>Year clusters</h2>
+                          <p className={styles.sectionLead}>
+                            최근 연도별로 기록 분포를 확인합니다.
+                          </p>
+                        </div>
+                      </div>
+                      <div className={styles.list}>
+                        {yearGroups.slice(0, 5).map((group) => (
+                          <article className={styles.listItem} key={group.year}>
+                            <div>
+                              <strong className={styles.itemTitle}>{group.year}</strong>
+                              <span className={styles.itemMeta}>
+                                {trimText(group.items[0]?.title ?? 'No records', 52)}
                               </span>
-                            </td>
-                            <td>{entry.displayOrder}</td>
-                            <td>
-                              <div className={styles.rowActions}>
-                                <button
-                                  className={styles.actionButton}
-                                  data-testid={`history-edit-${entry.id}`}
-                                  onClick={() => setEditingItem(entry)}
-                                  type="button"
-                                >
-                                  수정
-                                </button>
-                                <button
-                                  className={styles.actionButton}
-                                  data-testid={`history-delete-${entry.id}`}
-                                  onClick={() => setDeleteTarget(entry)}
-                                  type="button"
-                                >
-                                  삭제
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
+                            </div>
+                            <span className={styles.badgeMuted}>
+                              {group.items.length} items
+                            </span>
+                          </article>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
+                      </div>
+                    </section>
+
+                    <section className={styles.surface}>
+                      <div className={styles.sectionHeader}>
+                        <div>
+                          <h2 className={styles.sectionTitle}>Editing guide</h2>
+                          <p className={styles.sectionLead}>
+                            운영 중 자주 쓰는 기준을 고정 패널로 배치했습니다.
+                          </p>
+                        </div>
+                      </div>
+                      <ul className={styles.noteList}>
+                        <li className={styles.noteItem}>
+                          <strong className={styles.noteTitle}>1. Prioritize by narrative</strong>
+                          <span className={styles.noteCopy}>
+                            가장 최근 이벤트가 위에 오도록 유지하고, 시리즈 항목은
+                            같은 연도 내에서 순서를 묶어주세요.
+                          </span>
+                        </li>
+                        <li className={styles.noteItem}>
+                          <strong className={styles.noteTitle}>2. Hide before delete</strong>
+                          <span className={styles.noteCopy}>
+                            임시 보관이 필요하면 삭제보다 숨김을 먼저 사용하세요.
+                          </span>
+                        </li>
+                        <li className={styles.noteItem}>
+                          <strong className={styles.noteTitle}>3. Keep image coverage lean</strong>
+                          <span className={styles.noteCopy}>
+                            모든 연혁에 이미지를 넣기보다, 대표 항목에만 비주얼을
+                            집중하는 편이 관리 효율이 높습니다.
+                          </span>
+                        </li>
+                      </ul>
+                    </section>
+                  </aside>
+                </div>
               </>
             )}
           </AdminLayout>
@@ -526,7 +723,7 @@ function AdminHistoryPage() {
       </section>
 
       <Modal
-        description="연도, 월, 제목, 설명, 이미지와 활성 여부를 설정합니다."
+        description="연도, 월, 제목, 설명, 대표 이미지와 공개 여부를 설정합니다."
         onClose={() => setIsCreateOpen(false)}
         open={isCreateOpen}
         title="연혁 추가"
@@ -565,7 +762,7 @@ function AdminHistoryPage() {
       </Modal>
 
       <Modal
-        description="삭제한 연혁 항목은 복구되지 않습니다."
+        description="삭제된 연혁 항목은 복구되지 않습니다."
         onClose={() => setDeleteTarget(null)}
         open={Boolean(deleteTarget)}
         title="연혁 삭제 확인"
@@ -574,8 +771,12 @@ function AdminHistoryPage() {
           {deleteTarget?.title} 항목을 정말 삭제하시겠습니까?
         </p>
         <div className={styles.modalActions}>
-          <button className={styles.ghostButton} onClick={() => setDeleteTarget(null)} type="button">
-            취소
+          <button
+            className={styles.ghostButton}
+            onClick={() => setDeleteTarget(null)}
+            type="button"
+          >
+            Cancel
           </button>
           <button
             className={styles.dangerButton}
@@ -587,7 +788,7 @@ function AdminHistoryPage() {
             }}
             type="button"
           >
-            삭제
+            Delete
           </button>
         </div>
       </Modal>

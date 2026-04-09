@@ -593,11 +593,217 @@
   text-align: right;
 }
 
+.workspaceGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(19rem, 0.85fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.workspaceMain,
+.workspaceSide {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 0;
+}
+
+.workspaceMain {
+  position: relative;
+  z-index: 1;
+}
+
+.toolbarRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.toolbarMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.statPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(20, 41, 62, 0.1);
+  border-radius: 999px;
+  background-color: #f7fafc;
+  color: #5a6c7f;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.statPill strong {
+  color: #102132;
+}
+
+.tableNote {
+  color: #6c7d8e;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.tableLead {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.tableSubtext {
+  color: #6c7d8e;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.assetBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inlineBadge,
+.inlineBadgeActive,
+.inlineBadgeWarn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid rgba(20, 41, 62, 0.12);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.inlineBadge {
+  color: #5b6e80;
+  background-color: #f4f7fa;
+}
+
+.inlineBadgeActive {
+  color: #215674;
+  background-color: rgba(63, 142, 191, 0.12);
+  border-color: rgba(63, 142, 191, 0.18);
+}
+
+.inlineBadgeWarn {
+  color: #9c471f;
+  background-color: rgba(242, 106, 47, 0.12);
+  border-color: rgba(242, 106, 47, 0.22);
+}
+
+.noteList {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.noteItem {
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(20, 41, 62, 0.08);
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.noteTitle {
+  display: block;
+  color: #102132;
+  font-weight: 700;
+}
+
+.noteCopy {
+  display: block;
+  margin-top: 0.4rem;
+  color: #66798c;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.pageOverview {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(20, 41, 62, 0.08);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fb 100%);
+}
+
+.pageOverviewCopy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.pageOverviewTitle {
+  margin: 0;
+  color: #102132;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.editorGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.editorCard {
+  padding: 1.2rem;
+  border: 1px solid rgba(20, 41, 62, 0.1);
+  border-radius: 1rem;
+  background-color: #ffffff;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+}
+
+.editorCardDirty {
+  border-color: rgba(242, 106, 47, 0.28);
+  box-shadow: 0 12px 24px rgba(242, 106, 47, 0.08);
+}
+
+.editorCardHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.editorEyebrow {
+  margin: 0 0 0.35rem;
+  color: #607286;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 991px) {
   .metrics,
   .gridTwo,
-  .dashboardGrid {
+  .dashboardGrid,
+  .workspaceGrid {
     grid-template-columns: 1fr;
+  }
+
+  .toolbarRow,
+  .pageOverview,
+  .editorCardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tableNote {
+    text-align: left;
   }
 }
 

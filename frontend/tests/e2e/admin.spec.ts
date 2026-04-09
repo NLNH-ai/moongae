@@ -24,5 +24,5 @@ test('admin can log in and create a history entry', async ({ page }) => {
   await page.getByTestId('history-submit-button').click()
 
   await expect.poll(() => fixture.getHistoryItems().length).toBe(3)
-  await expect(page.getByText('E2E Created History')).toBeVisible()
+  await expect(page.getByTestId('history-row-3')).toContainText('E2E Created History')
 })
