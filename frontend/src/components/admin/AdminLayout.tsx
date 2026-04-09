@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { BRAND_NAME } from '../../config/branding'
+import { clearAdminReturnPath, getAdminLoginRoute } from '../../utils/adminNavigation'
 import { clearAdminToken } from '../../utils/auth'
 import styles from './AdminLayout.module.css'
 
@@ -54,6 +55,7 @@ function AdminLayout({
   adminName,
   children,
 }: AdminLayoutProps) {
+  const navigate = useNavigate()
   const operatorName = adminName ?? 'Preview Admin'
   const operatorInitial = operatorName.trim().charAt(0).toUpperCase()
 
@@ -102,9 +104,11 @@ function AdminLayout({
         <div className={styles.sidebarFooter}>
           <button
             className={styles.logout}
+            data-testid="admin-logout-button"
             onClick={() => {
               clearAdminToken()
-              window.location.assign('/admin')
+              clearAdminReturnPath()
+              navigate(getAdminLoginRoute(), { replace: true })
             }}
             type="button"
           >

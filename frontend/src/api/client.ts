@@ -1,5 +1,10 @@
 import axios from 'axios'
 import { apiBaseUrl } from '../config/runtime'
+import {
+  getAdminLoginUrl,
+  getCurrentAdminRoutePath,
+  setAdminReturnPath,
+} from '../utils/adminNavigation'
 import { clearAdminToken, getAdminToken } from '../utils/auth'
 
 export const apiClient = axios.create({
@@ -33,9 +38,12 @@ apiClient.interceptors.response.use(
         url !== '/admin/login'
       ) {
         clearAdminToken()
+        setAdminReturnPath(getCurrentAdminRoutePath())
 
-        if (window.location.pathname !== '/admin') {
-          window.location.assign('/admin')
+        const loginUrl = getAdminLoginUrl()
+
+        if (window.location.href !== loginUrl) {
+          window.location.assign(loginUrl)
         }
       }
     }

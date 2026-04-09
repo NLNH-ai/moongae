@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime-Dw2cE7zH.js";import{U as t}from"./admin-pages-CG9NmDiL.js";import{t as n}from"./editor-BLP6pUvh.js";var r=e(n(),1),i=t();function a({onChange:e,value:t}){return(0,i.jsx)(r.default,{onChange:e,theme:`snow`,value:t})}export{a as default};

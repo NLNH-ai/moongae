@@ -1,16 +1,31 @@
 import axios from 'axios'
 import { useState, type FormEvent } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { DEMO_ADMIN_CREDENTIALS, loginAdmin } from '../api/admin'
 import PageTransition from '../components/common/PageTransition'
 import { BRAND_NAME } from '../config/branding'
 import { isDemoMode } from '../config/runtime'
+import {
+  clearAdminReturnPath,
+  getAdminDashboardRoute,
+  getAdminReturnPath,
+  resolveAdminDestination,
+} from '../utils/adminNavigation'
 import { hasAdminToken, setAdminToken } from '../utils/auth'
 import styles from './AdminScreens.module.css'
 
+interface AdminRouteState {
+  from?: {
+    pathname: string
+    search?: string
+    hash?: string
+  }
+}
+
 function AdminLoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [username, setUsername] = useState(
     isDemoMode ? DEMO_ADMIN_CREDENTIALS.username : '',
   )
@@ -19,9 +34,13 @@ function AdminLoginPage() {
   )
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const routeState = location.state as AdminRouteState | null
+  const statePath = routeState?.from
+    ? `${routeState.from.pathname}${routeState.from.search ?? ''}${routeState.from.hash ?? ''}`
+    : null
 
   if (hasAdminToken()) {
-    return <Navigate replace to="/admin/dashboard" />
+    return <Navigate replace to={getAdminDashboardRoute()} />
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -36,7 +55,9 @@ function AdminLoginPage() {
       })
 
       setAdminToken(response.accessToken)
-      navigate('/admin/dashboard', { replace: true })
+      const destination = resolveAdminDestination(statePath, getAdminReturnPath())
+      clearAdminReturnPath()
+      navigate(destination, { replace: true })
     } catch (submitError) {
       if (axios.isAxiosError(submitError)) {
         setError(
