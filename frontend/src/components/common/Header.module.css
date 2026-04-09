@@ -178,7 +178,7 @@
     transition: opacity var(--transition-default);
   }
 
-  .mobileBackdropVisible {
+  .mobileBackdrop.mobileBackdropVisible {
     opacity: 1;
     pointer-events: auto;
   }
@@ -204,7 +204,7 @@
     transition: transform var(--transition-default);
   }
 
-  .mobilePanelOpen {
+  .mobilePanel.mobilePanelOpen {
     transform: translateX(0);
     visibility: visible;
     pointer-events: auto;
