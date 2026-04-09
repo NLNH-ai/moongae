@@ -54,14 +54,25 @@ function Modal({
         className={`${styles.dialog} ${size === 'large' ? styles.large : ''}`}
         onClick={(event) => event.stopPropagation()}
       >
+        <div className={styles.topStripe} />
         <header className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Admin Modal</p>
+            <div className={styles.headerMeta}>
+              <p className={styles.eyebrow}>Workspace Sheet</p>
+              <span className={styles.sheetType}>
+                {size === 'large' ? 'Expanded Editor' : 'Standard Editor'}
+              </span>
+            </div>
             <h2 className={styles.title}>{title}</h2>
             {description ? <p className={styles.description}>{description}</p> : null}
           </div>
-          <button aria-label="닫기" className={styles.close} onClick={onClose} type="button">
-            ×
+          <button
+            aria-label="Close modal"
+            className={styles.close}
+            onClick={onClose}
+            type="button"
+          >
+            Close
           </button>
         </header>
         <div className={styles.body}>{children}</div>

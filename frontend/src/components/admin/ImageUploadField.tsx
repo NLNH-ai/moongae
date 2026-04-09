@@ -28,25 +28,42 @@ function ImageUploadField({
       data-testid={testIdPrefix ? `${testIdPrefix}-field` : undefined}
     >
       <div className={styles.header}>
-        <span className={styles.label}>{label}</span>
-        {helper ? <span className={styles.helper}>{helper}</span> : null}
+        <div className={styles.copy}>
+          <span className={styles.label}>{label}</span>
+          {helper ? <span className={styles.helper}>{helper}</span> : null}
+        </div>
+        <span className={`${styles.status} ${value ? styles.statusActive : ''}`}>
+          {value ? 'Asset linked' : 'Awaiting upload'}
+        </span>
       </div>
+
       <div
         className={styles.preview}
         data-testid={testIdPrefix ? `${testIdPrefix}-preview` : undefined}
       >
         {value ? (
-          <img
-            alt={label}
-            data-testid={testIdPrefix ? `${testIdPrefix}-image` : undefined}
-            src={value}
-          />
+          <div className={styles.previewFrame}>
+            <img
+              alt={label}
+              data-testid={testIdPrefix ? `${testIdPrefix}-image` : undefined}
+              src={value}
+            />
+          </div>
         ) : (
           <div className={styles.placeholder}>
-            이미지를 업로드하면 여기에서 미리보기를 확인할 수 있습니다.
+            <strong className={styles.placeholderTitle}>No asset attached</strong>
+            <span className={styles.placeholderCopy}>
+              Upload an image to review the current visual in this workspace panel.
+            </span>
           </div>
         )}
       </div>
+
+      <div className={styles.metaRow}>
+        <span className={styles.metaItem}>Accepted: png, jpg, gif, webp</span>
+        <span className={styles.metaItem}>{value ? 'Preview ready' : 'No preview'}</span>
+      </div>
+
       <div className={styles.actions}>
         <button
           className={styles.button}
@@ -54,7 +71,7 @@ function ImageUploadField({
           onClick={() => inputRef.current?.click()}
           type="button"
         >
-          {uploading ? '업로드 중...' : '이미지 선택'}
+          {uploading ? 'Uploading...' : 'Select image'}
         </button>
         {value ? (
           <button
@@ -63,10 +80,11 @@ function ImageUploadField({
             onClick={onClear}
             type="button"
           >
-            이미지 제거
+            Remove image
           </button>
         ) : null}
       </div>
+
       <input
         accept="image/png,image/jpeg,image/gif,image/webp"
         className={styles.hiddenInput}
