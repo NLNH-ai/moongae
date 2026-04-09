@@ -13,4 +13,23 @@
   --radius-medium: 1.25rem;
   --container-width: min(1180px, calc(100vw - 3rem));
   --transition-default: 280ms ease;
+  --admin-accent: #3f8ebf;
+  --admin-accent-strong: #2e6f98;
+  --admin-accent-warm: #f26a2f;
+  --admin-surface: rgba(255, 255, 255, 0.96);
+  --admin-surface-muted: #f4f8fb;
+  --admin-surface-strong: #ffffff;
+  --admin-border: rgba(20, 41, 62, 0.1);
+  --admin-border-strong: rgba(20, 41, 62, 0.16);
+  --admin-text-strong: #102132;
+  --admin-text: #203244;
+  --admin-text-muted: #607286;
+  --admin-text-soft: #76889a;
+  --admin-shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.08);
+  --admin-shadow-md: 0 14px 28px rgba(15, 23, 42, 0.05);
+  --admin-radius-xl: 1.35rem;
+  --admin-radius-lg: 1rem;
+  --admin-radius-md: 0.85rem;
+  --admin-radius-sm: 0.72rem;
+  --admin-control-height: 3rem;
 }
