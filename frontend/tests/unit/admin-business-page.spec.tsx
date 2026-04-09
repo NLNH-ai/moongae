@@ -14,26 +14,20 @@ const adminApiMocks = vi.hoisted(() => ({
   createBusiness: vi.fn(),
   deleteBusiness: vi.fn(),
   deleteUpload: vi.fn(),
+  getAdminBusinessAreas: vi.fn(),
   getAdminMe: vi.fn(),
   updateBusiness: vi.fn(),
   uploadImage: vi.fn(),
-}))
-
-const publicApiMocks = vi.hoisted(() => ({
-  getBusinessAreas: vi.fn(),
 }))
 
 vi.mock('../../src/api/admin', () => ({
   createBusiness: adminApiMocks.createBusiness,
   deleteBusiness: adminApiMocks.deleteBusiness,
   deleteUpload: adminApiMocks.deleteUpload,
+  getAdminBusinessAreas: adminApiMocks.getAdminBusinessAreas,
   getAdminMe: adminApiMocks.getAdminMe,
   updateBusiness: adminApiMocks.updateBusiness,
   uploadImage: adminApiMocks.uploadImage,
-}))
-
-vi.mock('../../src/api/public', () => ({
-  getBusinessAreas: publicApiMocks.getBusinessAreas,
 }))
 
 vi.mock('../../src/components/admin/RichTextEditor', () => ({
@@ -64,7 +58,7 @@ describe('AdminBusinessPage', () => {
     ]
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
-    publicApiMocks.getBusinessAreas.mockImplementation(async () => businessState.items)
+    adminApiMocks.getAdminBusinessAreas.mockImplementation(async () => businessState.items)
     adminApiMocks.updateBusiness.mockImplementation(async (id, payload) => {
       const updated = makeBusinessArea({
         ...businessState.items.find((item) => item.id === id),

@@ -15,28 +15,22 @@ const adminApiMocks = vi.hoisted(() => ({
   createHistory: vi.fn(),
   deleteHistory: vi.fn(),
   deleteUpload: vi.fn(),
+  getAdminHistoryGroups: vi.fn(),
   getAdminMe: vi.fn(),
   updateHistory: vi.fn(),
   updateHistoryOrder: vi.fn(),
   uploadImage: vi.fn(),
 }))
 
-const publicApiMocks = vi.hoisted(() => ({
-  getHistoryGroups: vi.fn(),
-}))
-
 vi.mock('../../src/api/admin', () => ({
   createHistory: adminApiMocks.createHistory,
   deleteHistory: adminApiMocks.deleteHistory,
   deleteUpload: adminApiMocks.deleteUpload,
+  getAdminHistoryGroups: adminApiMocks.getAdminHistoryGroups,
   getAdminMe: adminApiMocks.getAdminMe,
   updateHistory: adminApiMocks.updateHistory,
   updateHistoryOrder: adminApiMocks.updateHistoryOrder,
   uploadImage: adminApiMocks.uploadImage,
-}))
-
-vi.mock('../../src/api/public', () => ({
-  getHistoryGroups: publicApiMocks.getHistoryGroups,
 }))
 
 describe('AdminHistoryPage', () => {
@@ -59,7 +53,7 @@ describe('AdminHistoryPage', () => {
     ]
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
-    publicApiMocks.getHistoryGroups.mockImplementation(async () =>
+    adminApiMocks.getAdminHistoryGroups.mockImplementation(async () =>
       toHistoryGroups(historyState.entries),
     )
     adminApiMocks.createHistory.mockImplementation(async (payload) => {

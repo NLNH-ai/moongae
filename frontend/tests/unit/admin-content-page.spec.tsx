@@ -17,24 +17,18 @@ const contentState = vi.hoisted(() => ({
 
 const adminApiMocks = vi.hoisted(() => ({
   deleteUpload: vi.fn(),
+  getAdminPageContents: vi.fn(),
   getAdminMe: vi.fn(),
   updateContent: vi.fn(),
   uploadImage: vi.fn(),
 }))
 
-const publicApiMocks = vi.hoisted(() => ({
-  getPageContents: vi.fn(),
-}))
-
 vi.mock('../../src/api/admin', () => ({
   deleteUpload: adminApiMocks.deleteUpload,
+  getAdminPageContents: adminApiMocks.getAdminPageContents,
   getAdminMe: adminApiMocks.getAdminMe,
   updateContent: adminApiMocks.updateContent,
   uploadImage: adminApiMocks.uploadImage,
-}))
-
-vi.mock('../../src/api/public', () => ({
-  getPageContents: publicApiMocks.getPageContents,
 }))
 
 describe('AdminContentPage', () => {
@@ -59,7 +53,7 @@ describe('AdminContentPage', () => {
     })
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
-    publicApiMocks.getPageContents.mockImplementation(async (pageKey) => {
+    adminApiMocks.getAdminPageContents.mockImplementation(async (pageKey) => {
       return contentState.itemsByPage[pageKey]
     })
     adminApiMocks.updateContent.mockImplementation(async (id, payload) => {
