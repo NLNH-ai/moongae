@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test'
+import type { Page, Request, Route } from '@playwright/test'
 
 interface ApiEnvelope<T> {
   success: boolean
@@ -6,6 +6,12 @@ interface ApiEnvelope<T> {
   message: string
   timestamp: string
 }
+
+const MOCK_ADMIN_TOKEN = 'mock-jwt-token'
+const MOCK_ADMIN_CREDENTIALS = {
+  username: 'superadmin',
+  password: 'admin1234',
+} as const
 
 function respond<T>(route: Route, data: T, message = 'ok') {
   const body: ApiEnvelope<T> = {
@@ -20,6 +26,44 @@ function respond<T>(route: Route, data: T, message = 'ok') {
     status: 200,
     body: JSON.stringify(body),
   })
+}
+
+function reject(route: Route, status: number, message: string) {
+  return route.fulfill({
+    contentType: 'application/json',
+    status,
+    body: JSON.stringify({
+      success: false,
+      data: null,
+      message,
+      timestamp: '2026-04-08T12:00:00',
+    }),
+  })
+}
+
+function pageResult<T>(
+  items: T[],
+  options?: {
+    page?: number
+    size?: number
+    sortBy?: string
+    sortDirection?: 'ASC' | 'DESC'
+  },
+) {
+  const page = options?.page ?? 0
+  const size = options?.size ?? 100
+
+  return {
+    items,
+    page,
+    size,
+    totalElements: items.length,
+    totalPages: items.length === 0 ? 0 : 1,
+    sortBy: options?.sortBy ?? 'displayOrder',
+    sortDirection: options?.sortDirection ?? 'ASC',
+    hasNext: false,
+    hasPrevious: false,
+  }
 }
 
 export function publicFixtureData() {
@@ -253,6 +297,10 @@ export async function mockPublicApi(page: Page) {
 export async function mockAdminApi(page: Page) {
   const fixture = publicFixtureData()
   let historyItems = fixture.history.flatMap((group) => group.items)
+  const businessItems = fixture.business
+  const isAuthorized = (request: Request) => {
+    return request.headers().authorization === `Bearer ${MOCK_ADMIN_TOKEN}`
+  }
 
   await page.route('**/*', async (route) => {
     const request = route.request()
@@ -264,13 +312,26 @@ export async function mockAdminApi(page: Page) {
     }
 
     if (pathname === '/api/admin/login' && method === 'POST') {
+      const body = JSON.parse(request.postData() ?? '{}')
+
+      if (
+        body.username !== MOCK_ADMIN_CREDENTIALS.username ||
+        body.password !== MOCK_ADMIN_CREDENTIALS.password
+      ) {
+        return reject(
+          route,
+          401,
+          'Login failed. Check the account credentials and try again.',
+        )
+      }
+
       return respond(route, {
-        accessToken: 'mock-jwt-token',
+        accessToken: MOCK_ADMIN_TOKEN,
         tokenType: 'Bearer',
         expiresIn: 86400000,
         admin: {
           id: 1,
-          username: 'superadmin',
+          username: MOCK_ADMIN_CREDENTIALS.username,
           name: 'Admin User',
           role: 'SUPER_ADMIN',
           lastLoginAt: '2026-04-08T12:00:00',
@@ -280,9 +341,13 @@ export async function mockAdminApi(page: Page) {
     }
 
     if (pathname === '/api/admin/me') {
+      if (!isAuthorized(request)) {
+        return reject(route, 401, 'Admin session expired. Sign in again.')
+      }
+
       return respond(route, {
         id: 1,
-        username: 'superadmin',
+        username: MOCK_ADMIN_CREDENTIALS.username,
         name: 'Admin User',
         role: 'SUPER_ADMIN',
         lastLoginAt: '2026-04-08T12:00:00',
@@ -291,6 +356,10 @@ export async function mockAdminApi(page: Page) {
     }
 
     if (pathname === '/api/admin/history' && method === 'POST') {
+      if (!isAuthorized(request)) {
+        return reject(route, 401, 'Admin session expired. Sign in again.')
+      }
+
       const body = JSON.parse(request.postData() ?? '{}')
       const created = {
         id: historyItems.length + 1,
@@ -300,6 +369,27 @@ export async function mockAdminApi(page: Page) {
       }
       historyItems = [...historyItems, created]
       return respond(route, created, 'created')
+    }
+
+    if (pathname === '/api/admin/history' && method === 'GET') {
+      if (!isAuthorized(request)) {
+        return reject(route, 401, 'Admin session expired. Sign in again.')
+      }
+
+      const items = [...historyItems].sort(
+        (left, right) =>
+          right.year - left.year ||
+          right.month - left.month ||
+          left.displayOrder - right.displayOrder,
+      )
+
+      return respond(
+        route,
+        pageResult(items, {
+          sortBy: 'timeline',
+          sortDirection: 'DESC',
+        }),
+      )
     }
 
     if (pathname === '/api/history') {
@@ -322,6 +412,59 @@ export async function mockAdminApi(page: Page) {
 
     if (pathname === '/api/business') {
       return respond(route, fixture.business)
+    }
+
+    if (pathname === '/api/admin/business') {
+      if (!isAuthorized(request)) {
+        return reject(route, 401, 'Admin session expired. Sign in again.')
+      }
+
+      const url = new URL(request.url())
+      const keyword = url.searchParams.get('keyword')?.trim().toLowerCase()
+      const isActiveParam = url.searchParams.get('isActive')
+      const isActive =
+        isActiveParam === 'true'
+          ? true
+          : isActiveParam === 'false'
+            ? false
+            : undefined
+
+      const filteredBusinessItems = businessItems.filter((item) => {
+        const matchesKeyword =
+          !keyword ||
+          item.title.toLowerCase().includes(keyword) ||
+          (item.subtitle ?? '').toLowerCase().includes(keyword)
+        const matchesActive =
+          typeof isActive === 'boolean' ? item.isActive === isActive : true
+
+        return matchesKeyword && matchesActive
+      })
+
+      return respond(
+        route,
+        pageResult(filteredBusinessItems, {
+          sortBy: 'displayOrder',
+          sortDirection: 'ASC',
+        }),
+      )
+    }
+
+    if (pathname === '/api/admin/content') {
+      if (!isAuthorized(request)) {
+        return reject(route, 401, 'Admin session expired. Sign in again.')
+      }
+
+      const url = new URL(request.url())
+      const pageKey = url.searchParams.get('pageKey') as keyof typeof fixture.contents | null
+      const items = pageKey ? fixture.contents[pageKey] : Object.values(fixture.contents).flat()
+
+      return respond(
+        route,
+        pageResult(items, {
+          sortBy: 'displayOrder',
+          sortDirection: 'ASC',
+        }),
+      )
     }
 
     if (pathname === '/api/content/HOME') {

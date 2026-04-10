@@ -16,7 +16,10 @@ import {
   updateBusiness,
   uploadImage,
 } from '../api/admin'
-import { publicQueryKeys } from '../api/queryKeys'
+import type { AdminDataTableColumn } from '../components/admin/AdminDataTable'
+import { adminQueryKeys, publicQueryKeys } from '../api/queryKeys'
+import AdminDataTable from '../components/admin/AdminDataTable'
+import AdminTableToolbar from '../components/admin/AdminTableToolbar'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import Modal from '../components/common/Modal'
@@ -32,6 +35,8 @@ import { trimText } from '../utils/helpers'
 import styles from './AdminScreens.module.css'
 
 const RichTextEditor = lazy(() => import('../components/admin/RichTextEditor'))
+
+type BusinessStatusFilter = 'all' | 'active' | 'hidden'
 
 interface BusinessEditorFormProps {
   initialValue?: BusinessAreaItem | null
@@ -307,23 +312,35 @@ function AdminBusinessPage() {
   const [editingItem, setEditingItem] = useState<BusinessAreaItem | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BusinessAreaItem | null>(null)
+  const [searchKeyword, setSearchKeyword] = useState('')
+  const [statusFilter, setStatusFilter] = useState<BusinessStatusFilter>('all')
+
+  const businessFilters = useMemo(
+    () => ({
+      keyword: searchKeyword.trim() || undefined,
+      isActive:
+        statusFilter === 'all' ? undefined : statusFilter === 'active',
+      page: 0,
+      size: 100,
+      sortBy: 'displayOrder' as const,
+      sortDirection: 'ASC' as const,
+    }),
+    [searchKeyword, statusFilter],
+  )
 
   const adminQuery = useQuery({
-    queryKey: ['admin', 'me'],
+    queryKey: adminQueryKeys.me,
     queryFn: getAdminMe,
   })
 
   const businessQuery = useQuery({
-    queryKey: publicQueryKeys.business,
-    queryFn: getAdminBusinessAreas,
+    queryKey: adminQueryKeys.business(businessFilters),
+    queryFn: () => getAdminBusinessAreas(businessFilters),
   })
 
   const items = useMemo(
-    () =>
-      [...(businessQuery.data ?? [])].sort(
-        (left, right) => left.displayOrder - right.displayOrder,
-      ),
-    [businessQuery.data],
+    () => businessQuery.data?.items ?? [],
+    [businessQuery.data?.items],
   )
 
   const activeCount = items.filter((item) => item.isActive).length
@@ -345,6 +362,7 @@ function AdminBusinessPage() {
         description: 'The business catalog is updated and ready for publishing.',
       })
       setIsCreateOpen(false)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'business'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.business })
     },
     onError: (error) => {
@@ -368,6 +386,7 @@ function AdminBusinessPage() {
         description: 'The business content is synced to the admin workspace.',
       })
       setEditingItem(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'business'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.business })
     },
     onError: (error) => {
@@ -390,6 +409,7 @@ function AdminBusinessPage() {
         description: 'The selected business area was removed from the registry.',
       })
       setDeleteTarget(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'business'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.business })
     },
     onError: (error) => {
@@ -404,6 +424,98 @@ function AdminBusinessPage() {
     },
   })
 
+  const businessColumns = useMemo<AdminDataTableColumn<BusinessAreaItem>[]>(
+    () => [
+      {
+        id: 'area',
+        header: 'Area',
+        render: (item) => (
+          <div className={styles.tableLead}>
+            <span className={styles.cellTitle}>{item.title}</span>
+            <span className={styles.tableSubtext}>
+              {item.subtitle || 'No subtitle configured'}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: 'content',
+        header: 'Content',
+        render: (item) => (
+          <span className={styles.tableSubtext}>
+            {trimText(stripHtml(item.description) || 'No description', 96)}
+          </span>
+        ),
+      },
+      {
+        id: 'assets',
+        header: 'Assets',
+        render: (item) => (
+          <div className={styles.assetBadges}>
+            <span
+              className={`${styles.inlineBadge} ${
+                item.iconUrl ? styles.inlineBadgeActive : ''
+              }`}
+            >
+              {item.iconUrl ? 'Icon ready' : 'No icon'}
+            </span>
+            <span
+              className={`${styles.inlineBadge} ${
+                item.imageUrl ? styles.inlineBadgeActive : ''
+              }`}
+            >
+              {item.imageUrl ? 'Visual ready' : 'No visual'}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        render: (item) => (
+          <span className={item.isActive ? styles.badge : styles.badgeMuted}>
+            {item.isActive ? 'Active' : 'Hidden'}
+          </span>
+        ),
+      },
+      {
+        id: 'order',
+        header: 'Order',
+        render: (item) => item.displayOrder,
+      },
+      {
+        id: 'updated',
+        header: 'Updated',
+        render: (item) => formatKoreanDate(item.updatedAt),
+      },
+      {
+        id: 'action',
+        header: 'Action',
+        render: (item) => (
+          <div className={styles.rowActions}>
+            <button
+              className={styles.actionButton}
+              data-testid={`business-edit-${item.id}`}
+              onClick={() => setEditingItem(item)}
+              type="button"
+            >
+              Edit
+            </button>
+            <button
+              className={styles.actionButton}
+              data-testid={`business-delete-${item.id}`}
+              onClick={() => setDeleteTarget(item)}
+              type="button"
+            >
+              Delete
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [],
+  )
+
   return (
     <PageTransition>
       <Helmet>
@@ -417,7 +529,7 @@ function AdminBusinessPage() {
         className={styles.loginShell}
         style={{ minHeight: 'auto', paddingTop: '7rem' }}
       >
-        <div className="container" style={{ width: 'var(--container-width)' }}>
+        <div className={styles.adminViewport}>
           <AdminLayout
             adminName={adminQuery.data?.name}
             description="사업 카탈로그, 리치 텍스트, 아이콘과 비주얼 자산을 함께 관리합니다."
@@ -482,106 +594,74 @@ function AdminBusinessPage() {
                         </button>
                       </div>
 
-                      <div className={styles.toolbarRow}>
-                        <div className={styles.toolbarMeta}>
-                          <span className={styles.statPill}>
-                            <strong>{iconCoverageCount}</strong> icon-ready
-                          </span>
-                          <span className={styles.statPill}>
-                            <strong>{visualCoverageCount}</strong> visual-ready
-                          </span>
-                          <span className={styles.statPill}>
-                            <strong>{hiddenCount}</strong> hidden
-                          </span>
-                        </div>
-                        <span className={styles.tableNote}>
-                          Keep priority businesses near the top and ensure key visuals are attached.
-                        </span>
-                      </div>
+                      <AdminTableToolbar
+                        controls={[
+                          {
+                            id: 'business-search-input',
+                            label: 'Search',
+                            control: (
+                              <input
+                                className={styles.input}
+                                data-testid="business-search-input"
+                                id="business-search-input"
+                                onChange={(event) => setSearchKeyword(event.target.value)}
+                                placeholder="Search title or subtitle"
+                                value={searchKeyword}
+                              />
+                            ),
+                          },
+                          {
+                            id: 'business-status-filter',
+                            label: 'Status',
+                            control: (
+                              <select
+                                className={styles.select}
+                                data-testid="business-status-filter"
+                                id="business-status-filter"
+                                onChange={(event) =>
+                                  setStatusFilter(event.target.value as BusinessStatusFilter)
+                                }
+                                value={statusFilter}
+                              >
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="hidden">Hidden</option>
+                              </select>
+                            ),
+                          },
+                        ]}
+                        meta={
+                          <>
+                            <span className={styles.statPill}>
+                              <strong>{iconCoverageCount}</strong> icon-ready
+                            </span>
+                            <span className={styles.statPill}>
+                              <strong>{visualCoverageCount}</strong> visual-ready
+                            </span>
+                            <span className={styles.statPill}>
+                              <strong>{hiddenCount}</strong> hidden
+                            </span>
+                            <span className={styles.tableNote}>
+                              Keep priority businesses near the top and ensure key visuals are attached.
+                            </span>
+                          </>
+                        }
+                      />
 
-                      <div className={styles.tableWrap}>
-                        <table className={styles.table}>
-                          <thead>
-                            <tr>
-                              <th>Area</th>
-                              <th>Content</th>
-                              <th>Assets</th>
-                              <th>Status</th>
-                              <th>Order</th>
-                              <th>Updated</th>
-                              <th>Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {items.map((item) => (
-                              <tr data-testid={`business-row-${item.id}`} key={item.id}>
-                                <td>
-                                  <div className={styles.tableLead}>
-                                    <span className={styles.cellTitle}>{item.title}</span>
-                                    <span className={styles.tableSubtext}>
-                                      {item.subtitle || 'No subtitle configured'}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td>
-                                  <span className={styles.tableSubtext}>
-                                    {trimText(stripHtml(item.description) || 'No description', 96)}
-                                  </span>
-                                </td>
-                                <td>
-                                  <div className={styles.assetBadges}>
-                                    <span
-                                      className={`${styles.inlineBadge} ${
-                                        item.iconUrl ? styles.inlineBadgeActive : ''
-                                      }`}
-                                    >
-                                      {item.iconUrl ? 'Icon ready' : 'No icon'}
-                                    </span>
-                                    <span
-                                      className={`${styles.inlineBadge} ${
-                                        item.imageUrl ? styles.inlineBadgeActive : ''
-                                      }`}
-                                    >
-                                      {item.imageUrl ? 'Visual ready' : 'No visual'}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td>
-                                  <span
-                                    className={
-                                      item.isActive ? styles.badge : styles.badgeMuted
-                                    }
-                                  >
-                                    {item.isActive ? 'Active' : 'Hidden'}
-                                  </span>
-                                </td>
-                                <td>{item.displayOrder}</td>
-                                <td>{formatKoreanDate(item.updatedAt)}</td>
-                                <td>
-                                  <div className={styles.rowActions}>
-                                    <button
-                                      className={styles.actionButton}
-                                      data-testid={`business-edit-${item.id}`}
-                                      onClick={() => setEditingItem(item)}
-                                      type="button"
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      className={styles.actionButton}
-                                      data-testid={`business-delete-${item.id}`}
-                                      onClick={() => setDeleteTarget(item)}
-                                      type="button"
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                      <AdminDataTable
+                        columns={businessColumns}
+                        emptyCellClassName={styles.emptyTableCell}
+                        emptyState={
+                          <div className={styles.emptyState}>
+                            No business areas match the current search filters.
+                          </div>
+                        }
+                        getRowKey={(item) => item.id}
+                        getRowTestId={(item) => `business-row-${item.id}`}
+                        rows={items}
+                        tableClassName={styles.table}
+                        wrapClassName={styles.tableWrap}
+                      />
                     </section>
                   </div>
 

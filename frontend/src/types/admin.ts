@@ -1,3 +1,5 @@
+import type { PageKey } from './domain'
+
 export interface AdminMe {
   id: number
   username: string
@@ -50,4 +52,47 @@ export interface ContentUpdatePayload {
   imageUrl: string | null
   displayOrder: number
   isActive: boolean
+}
+
+export type AdminSortDirection = 'ASC' | 'DESC'
+
+export interface AdminListResponse<T> {
+  items: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  sortBy: string
+  sortDirection: AdminSortDirection
+  hasNext: boolean
+  hasPrevious: boolean
+}
+
+export interface AdminHistoryFilters {
+  keyword?: string
+  isActive?: boolean
+  year?: number
+  page?: number
+  size?: number
+  sortBy?: 'timeline' | 'year' | 'month' | 'title' | 'displayOrder' | 'updatedAt'
+  sortDirection?: AdminSortDirection
+}
+
+export interface AdminBusinessFilters {
+  keyword?: string
+  isActive?: boolean
+  page?: number
+  size?: number
+  sortBy?: 'displayOrder' | 'title' | 'updatedAt'
+  sortDirection?: AdminSortDirection
+}
+
+export interface AdminContentFilters {
+  pageKey?: PageKey
+  keyword?: string
+  isActive?: boolean
+  page?: number
+  size?: number
+  sortBy?: 'displayOrder' | 'sectionKey' | 'title' | 'updatedAt'
+  sortDirection?: AdminSortDirection
 }

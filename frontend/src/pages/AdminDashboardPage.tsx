@@ -6,7 +6,7 @@ import {
   getAdminMe,
   getAdminPageContents,
 } from '../api/admin'
-import { publicQueryKeys } from '../api/queryKeys'
+import { adminQueryKeys } from '../api/queryKeys'
 import AdminLayout from '../components/admin/AdminLayout'
 import PageTransition from '../components/common/PageTransition'
 import SectionSkeleton from '../components/common/SectionSkeleton'
@@ -22,49 +22,57 @@ function getPercentLabel(activeCount: number, totalCount: number) {
   return `${Math.round((activeCount / totalCount) * 100)}%`
 }
 
+function formatRoleLabel(role?: string) {
+  if (!role) {
+    return '최고 관리자'
+  }
+
+  return role === 'SUPER_ADMIN' ? '최고 관리자' : '일반 관리자'
+}
+
 function AdminDashboardPage() {
   const adminQuery = useQuery({
-    queryKey: ['admin', 'me'],
+    queryKey: adminQueryKeys.me,
     queryFn: getAdminMe,
   })
 
   const historyQuery = useQuery({
-    queryKey: publicQueryKeys.history,
-    queryFn: getAdminHistoryGroups,
+    queryKey: adminQueryKeys.history({ page: 0, size: 100 }),
+    queryFn: () => getAdminHistoryGroups({ page: 0, size: 100 }),
   })
 
   const businessQuery = useQuery({
-    queryKey: publicQueryKeys.business,
-    queryFn: getAdminBusinessAreas,
+    queryKey: adminQueryKeys.business({ page: 0, size: 100 }),
+    queryFn: () => getAdminBusinessAreas({ page: 0, size: 100 }),
   })
 
   const homeContentQuery = useQuery({
-    queryKey: publicQueryKeys.pageContents('HOME'),
-    queryFn: () => getAdminPageContents('HOME'),
+    queryKey: adminQueryKeys.pageContents({ pageKey: 'HOME', page: 0, size: 100 }),
+    queryFn: () => getAdminPageContents('HOME', { page: 0, size: 100 }),
   })
 
   const aboutContentQuery = useQuery({
-    queryKey: publicQueryKeys.pageContents('ABOUT'),
-    queryFn: () => getAdminPageContents('ABOUT'),
+    queryKey: adminQueryKeys.pageContents({ pageKey: 'ABOUT', page: 0, size: 100 }),
+    queryFn: () => getAdminPageContents('ABOUT', { page: 0, size: 100 }),
   })
 
   const businessContentQuery = useQuery({
-    queryKey: publicQueryKeys.pageContents('BUSINESS'),
-    queryFn: () => getAdminPageContents('BUSINESS'),
+    queryKey: adminQueryKeys.pageContents({ pageKey: 'BUSINESS', page: 0, size: 100 }),
+    queryFn: () => getAdminPageContents('BUSINESS', { page: 0, size: 100 }),
   })
 
   const contactContentQuery = useQuery({
-    queryKey: publicQueryKeys.pageContents('CONTACT'),
-    queryFn: () => getAdminPageContents('CONTACT'),
+    queryKey: adminQueryKeys.pageContents({ pageKey: 'CONTACT', page: 0, size: 100 }),
+    queryFn: () => getAdminPageContents('CONTACT', { page: 0, size: 100 }),
   })
 
   const historyEntries = flattenHistoryGroups(historyQuery.data ?? [])
-  const businessItems = businessQuery.data ?? []
+  const businessItems = businessQuery.data?.items ?? []
   const contentItems = [
-    ...(homeContentQuery.data ?? []),
-    ...(aboutContentQuery.data ?? []),
-    ...(businessContentQuery.data ?? []),
-    ...(contactContentQuery.data ?? []),
+    ...(homeContentQuery.data?.items ?? []),
+    ...(aboutContentQuery.data?.items ?? []),
+    ...(businessContentQuery.data?.items ?? []),
+    ...(contactContentQuery.data?.items ?? []),
   ]
 
   const activeHistoryCount = historyEntries.filter((entry) => entry.isActive).length
@@ -101,8 +109,8 @@ function AdminDashboardPage() {
   const systemRows = [
     {
       label: '운영 계정',
-      value: adminQuery.data?.name ?? 'Preview Admin',
-      meta: adminQuery.data?.role ?? 'SUPER_ADMIN',
+      value: adminQuery.data?.name ?? '프리뷰 관리자',
+      meta: formatRoleLabel(adminQuery.data?.role),
     },
     {
       label: '활성 콘텐츠 섹션',
@@ -122,17 +130,17 @@ function AdminDashboardPage() {
     {
       label: '연혁 공개율',
       value: getPercentLabel(activeHistoryCount, historyEntries.length),
-      meta: `${activeHistoryCount} / ${historyEntries.length} active`,
+      meta: `${activeHistoryCount} / ${historyEntries.length}개 공개`,
     },
     {
       label: '사업 운영율',
       value: getPercentLabel(activeBusinessCount, businessItems.length),
-      meta: `${activeBusinessCount} / ${businessItems.length} active`,
+      meta: `${activeBusinessCount} / ${businessItems.length}개 공개`,
     },
     {
       label: '섹션 게시율',
       value: getPercentLabel(activeContentCount, contentItems.length),
-      meta: `${activeContentCount} / ${contentItems.length} active`,
+      meta: `${activeContentCount} / ${contentItems.length}개 게시`,
     },
   ]
 
@@ -154,10 +162,10 @@ function AdminDashboardPage() {
         />
       </Helmet>
       <section className={styles.loginShell} style={{ minHeight: 'auto', paddingTop: '7rem' }}>
-        <div className="container" style={{ width: 'var(--container-width)' }}>
+        <div className={styles.adminViewport}>
           <AdminLayout
             adminName={adminQuery.data?.name}
-            description="콘텐츠 운영 현황과 최신 업데이트, 게시 상태를 운영자 관점에서 빠르게 확인할 수 있는 화면입니다."
+            description="콘텐츠 운영 현황과 최근 업데이트, 게시 상태를 운영자 관점에서 빠르게 확인할 수 있는 화면입니다."
             title="대시보드"
           >
             {isLoading ? (
@@ -166,29 +174,29 @@ function AdminDashboardPage() {
               <>
                 <div className={styles.metrics}>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>History Items</span>
+                    <span className={styles.metricLabel}>연혁 항목</span>
                     <strong className={styles.metricValue}>{historyEntries.length}</strong>
                     <span className={styles.metricMeta}>
-                      공개 {activeHistoryCount}건 · 마지막 수정{' '}
-                      {latestUpdate ? formatKoreanDate(latestUpdate) : 'N/A'}
+                      공개 {activeHistoryCount}건 · 최근 수정{' '}
+                      {latestUpdate ? formatKoreanDate(latestUpdate) : '없음'}
                     </span>
                   </article>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Business Areas</span>
+                    <span className={styles.metricLabel}>사업분야</span>
                     <strong className={styles.metricValue}>{businessItems.length}</strong>
                     <span className={styles.metricMeta}>
-                      운영 {activeBusinessCount}건 · 리치 텍스트/이미지 포함
+                      운영 {activeBusinessCount}건 · 설명과 대표 이미지 포함
                     </span>
                   </article>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Page Sections</span>
+                    <span className={styles.metricLabel}>페이지 섹션</span>
                     <strong className={styles.metricValue}>{contentItems.length}</strong>
                     <span className={styles.metricMeta}>
                       게시 {activeContentCount}건 · 페이지별 섹션 관리
                     </span>
                   </article>
                   <article className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Publishing Health</span>
+                    <span className={styles.metricLabel}>게시 상태</span>
                     <strong className={styles.metricValue}>
                       {getPercentLabel(
                         activeHistoryCount + activeBusinessCount + activeContentCount,
@@ -262,7 +270,7 @@ function AdminDashboardPage() {
                         <div>
                           <h2 className={styles.sectionTitle}>게시 상태</h2>
                           <p className={styles.sectionLead}>
-                            각 관리 대상의 공개율과 운영 상태를 기준으로 점검합니다.
+                            각 관리 영역의 공개율과 운영 상태를 기준 수치로 보여줍니다.
                           </p>
                         </div>
                       </div>

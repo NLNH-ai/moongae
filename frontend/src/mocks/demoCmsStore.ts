@@ -1,4 +1,8 @@
 import type {
+  AdminBusinessFilters,
+  AdminContentFilters,
+  AdminHistoryFilters,
+  AdminListResponse,
   AdminMe,
   BusinessUpsertPayload,
   ContentUpdatePayload,
@@ -169,6 +173,33 @@ function sortContentItems(
   )
 }
 
+function paginateItems<T>(
+  items: T[],
+  options?: {
+    page?: number
+    size?: number
+    sortBy?: string
+    sortDirection?: 'ASC' | 'DESC'
+  },
+): AdminListResponse<T> {
+  const page = options?.page ?? 0
+  const size = options?.size ?? 100
+  const start = page * size
+  const pagedItems = items.slice(start, start + size)
+
+  return {
+    items: cloneValue(pagedItems),
+    page,
+    size,
+    totalElements: items.length,
+    totalPages: items.length === 0 ? 0 : Math.ceil(items.length / size),
+    sortBy: options?.sortBy ?? 'displayOrder',
+    sortDirection: options?.sortDirection ?? 'ASC',
+    hasNext: start + size < items.length,
+    hasPrevious: page > 0,
+  }
+}
+
 export function getDemoCompanyProfile() {
   return cloneValue(readStore().company)
 }
@@ -177,8 +208,58 @@ export function getDemoHistoryGroups(options?: { includeInactive?: boolean }) {
   return buildHistoryGroups(readStore().history, options)
 }
 
+export function getDemoAdminHistoryList(filters: AdminHistoryFilters = {}) {
+  const keyword = filters.keyword?.trim().toLowerCase()
+  const filtered = sortHistoryEntries(readStore().history).filter((item) => {
+    const matchesKeyword =
+      !keyword ||
+      item.title.toLowerCase().includes(keyword) ||
+      item.description.toLowerCase().includes(keyword)
+    const matchesActive =
+      typeof filters.isActive === 'boolean'
+        ? item.isActive === filters.isActive
+        : true
+    const matchesYear = filters.year ? item.year === filters.year : true
+
+    return matchesKeyword && matchesActive && matchesYear
+  })
+
+  return paginateItems(filtered, {
+    page: filters.page,
+    size: filters.size,
+    sortBy: filters.sortBy ?? 'timeline',
+    sortDirection: filters.sortDirection ?? 'DESC',
+  })
+}
+
 export function getDemoBusinessAreas(options?: { includeInactive?: boolean }) {
   return sortBusinessItems(readStore().business, options)
+}
+
+export function getDemoAdminBusinessList(filters: AdminBusinessFilters = {}) {
+  const keyword = filters.keyword?.trim().toLowerCase()
+  const filtered = sortBusinessItems(readStore().business, {
+    includeInactive: true,
+  }).filter((item) => {
+    const matchesKeyword =
+      !keyword ||
+      item.title.toLowerCase().includes(keyword) ||
+      (item.subtitle ?? '').toLowerCase().includes(keyword) ||
+      item.description.toLowerCase().includes(keyword)
+    const matchesActive =
+      typeof filters.isActive === 'boolean'
+        ? item.isActive === filters.isActive
+        : true
+
+    return matchesKeyword && matchesActive
+  })
+
+  return paginateItems(filtered, {
+    page: filters.page,
+    size: filters.size,
+    sortBy: filters.sortBy ?? 'displayOrder',
+    sortDirection: filters.sortDirection ?? 'ASC',
+  })
 }
 
 export function getDemoBusinessArea(id: number | string) {
@@ -199,6 +280,33 @@ export function getDemoPageContents(
 ) {
   const items = readStore().contents.filter((item) => item.pageKey === pageKey)
   return sortContentItems(items, options)
+}
+
+export function getDemoAdminContentList(filters: AdminContentFilters = {}) {
+  const keyword = filters.keyword?.trim().toLowerCase()
+  const filtered = sortContentItems(readStore().contents, {
+    includeInactive: true,
+  }).filter((item) => {
+    const matchesPageKey = filters.pageKey ? item.pageKey === filters.pageKey : true
+    const matchesKeyword =
+      !keyword ||
+      item.sectionKey.toLowerCase().includes(keyword) ||
+      item.title.toLowerCase().includes(keyword) ||
+      item.content.toLowerCase().includes(keyword)
+    const matchesActive =
+      typeof filters.isActive === 'boolean'
+        ? item.isActive === filters.isActive
+        : true
+
+    return matchesPageKey && matchesKeyword && matchesActive
+  })
+
+  return paginateItems(filtered, {
+    page: filters.page,
+    size: filters.size,
+    sortBy: filters.sortBy ?? 'displayOrder',
+    sortDirection: filters.sortDirection ?? 'ASC',
+  })
 }
 
 export function getDemoPageSection(pageKey: PageKey, sectionKey: string) {

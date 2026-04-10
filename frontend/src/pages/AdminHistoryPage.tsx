@@ -11,13 +11,16 @@ import {
   createHistory,
   deleteHistory,
   deleteUpload,
-  getAdminHistoryGroups,
+  getAdminHistoryEntries,
   getAdminMe,
   updateHistory,
   updateHistoryOrder,
   uploadImage,
 } from '../api/admin'
-import { publicQueryKeys } from '../api/queryKeys'
+import { adminQueryKeys, publicQueryKeys } from '../api/queryKeys'
+import type { AdminDataTableColumn } from '../components/admin/AdminDataTable'
+import AdminDataTable from '../components/admin/AdminDataTable'
+import AdminTableToolbar from '../components/admin/AdminTableToolbar'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import Modal from '../components/common/Modal'
@@ -30,8 +33,10 @@ import {
   formatMonth,
   formatPageTitle,
 } from '../utils/formatters'
-import { flattenHistoryGroups, toHistoryGroups, trimText } from '../utils/helpers'
+import { toHistoryGroups, trimText } from '../utils/helpers'
 import styles from './AdminScreens.module.css'
+
+type HistoryStatusFilter = 'all' | 'active' | 'hidden'
 
 interface HistoryEditorFormProps {
   initialValue?: HistoryEntry | null
@@ -292,29 +297,35 @@ function AdminHistoryPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<HistoryEntry | null>(null)
   const [draggingId, setDraggingId] = useState<number | null>(null)
+  const [searchKeyword, setSearchKeyword] = useState('')
+  const [statusFilter, setStatusFilter] = useState<HistoryStatusFilter>('all')
+
+  const historyFilters = useMemo(
+    () => ({
+      keyword: searchKeyword.trim() || undefined,
+      isActive:
+        statusFilter === 'all' ? undefined : statusFilter === 'active',
+      page: 0,
+      size: 100,
+      sortBy: 'timeline' as const,
+      sortDirection: 'DESC' as const,
+    }),
+    [searchKeyword, statusFilter],
+  )
 
   const adminQuery = useQuery({
-    queryKey: ['admin', 'me'],
+    queryKey: adminQueryKeys.me,
     queryFn: getAdminMe,
   })
 
   const historyQuery = useQuery({
-    queryKey: publicQueryKeys.history,
-    queryFn: getAdminHistoryGroups,
+    queryKey: adminQueryKeys.history(historyFilters),
+    queryFn: () => getAdminHistoryEntries(historyFilters),
   })
 
-  const yearGroups = useMemo(
-    () => [...(historyQuery.data ?? [])].sort((left, right) => right.year - left.year),
-    [historyQuery.data],
-  )
+  const entries = useMemo(() => historyQuery.data?.items ?? [], [historyQuery.data?.items])
 
-  const entries = useMemo(
-    () =>
-      flattenHistoryGroups(yearGroups).sort(
-        (left, right) => left.displayOrder - right.displayOrder,
-      ),
-    [yearGroups],
-  )
+  const yearGroups = useMemo(() => toHistoryGroups(entries), [entries])
 
   const createMutation = useMutation({
     mutationFn: createHistory,
@@ -324,6 +335,7 @@ function AdminHistoryPage() {
         description: 'The history timeline was updated successfully.',
       })
       setIsCreateOpen(false)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'history'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
@@ -347,6 +359,7 @@ function AdminHistoryPage() {
         description: 'The selected timeline record is now live.',
       })
       setEditingItem(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'history'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
@@ -369,6 +382,7 @@ function AdminHistoryPage() {
         description: 'The history entry was removed from the registry.',
       })
       setDeleteTarget(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'history'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
@@ -385,12 +399,12 @@ function AdminHistoryPage() {
 
   const orderMutation = useMutation({
     mutationFn: updateHistoryOrder,
-    onSuccess: async (data) => {
-      queryClient.setQueryData(publicQueryKeys.history, toHistoryGroups(data))
+    onSuccess: async () => {
       showToast({
         title: 'Order updated',
         description: 'The drag-and-drop sequence is synced to the workspace.',
       })
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'history'] })
       await queryClient.invalidateQueries({ queryKey: publicQueryKeys.history })
     },
     onError: (error) => {
@@ -416,8 +430,86 @@ function AdminHistoryPage() {
         new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
     )[0] ?? null
 
+  const canReorder = !searchKeyword.trim() && statusFilter === 'all'
+
+  const historyColumns = useMemo<AdminDataTableColumn<HistoryEntry>[]>(
+    () => [
+      {
+        id: 'drag',
+        header: '',
+        render: () => <span className={styles.dragHandle}>⋮⋮</span>,
+      },
+      {
+        id: 'year',
+        header: 'Year',
+        render: (entry) => entry.year,
+      },
+      {
+        id: 'month',
+        header: 'Month',
+        render: (entry) => formatMonth(entry.month),
+      },
+      {
+        id: 'event',
+        header: 'Event',
+        render: (entry) => (
+          <div className={styles.tableLead}>
+            <span className={styles.cellTitle}>{entry.title}</span>
+            <span className={styles.tableSubtext}>
+              {trimText(entry.description, 96)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        render: (entry) => (
+          <span className={entry.isActive ? styles.badge : styles.badgeMuted}>
+            {entry.isActive ? 'Active' : 'Hidden'}
+          </span>
+        ),
+      },
+      {
+        id: 'order',
+        header: 'Order',
+        render: (entry) => entry.displayOrder,
+      },
+      {
+        id: 'updated',
+        header: 'Updated',
+        render: (entry) => formatKoreanDate(entry.updatedAt),
+      },
+      {
+        id: 'action',
+        header: 'Action',
+        render: (entry) => (
+          <div className={styles.rowActions}>
+            <button
+              className={styles.actionButton}
+              data-testid={`history-edit-${entry.id}`}
+              onClick={() => setEditingItem(entry)}
+              type="button"
+            >
+              Edit
+            </button>
+            <button
+              className={styles.actionButton}
+              data-testid={`history-delete-${entry.id}`}
+              onClick={() => setDeleteTarget(entry)}
+              type="button"
+            >
+              Delete
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [],
+  )
+
   const handleDrop = (targetId: number) => {
-    if (!draggingId || draggingId === targetId || orderMutation.isPending) {
+    if (!canReorder || !draggingId || draggingId === targetId || orderMutation.isPending) {
       setDraggingId(null)
       return
     }
@@ -456,7 +548,7 @@ function AdminHistoryPage() {
         className={styles.loginShell}
         style={{ minHeight: 'auto', paddingTop: '7rem' }}
       >
-        <div className="container" style={{ width: 'var(--container-width)' }}>
+        <div className={styles.adminViewport}>
           <AdminLayout
             adminName={adminQuery.data?.name}
             description="타임라인 기록, 공개 상태, 노출 순서를 한 화면에서 통제합니다."
@@ -517,97 +609,83 @@ function AdminHistoryPage() {
                         </button>
                       </div>
 
-                      <div className={styles.toolbarRow}>
-                        <div className={styles.toolbarMeta}>
-                          <span className={styles.statPill}>
-                            <strong>{yearGroups.length}</strong> year clusters
-                          </span>
-                          <span className={styles.statPill}>
-                            <strong>{inactiveCount}</strong> hidden items
-                          </span>
-                          <span className={styles.statPill}>
-                            <strong>{orderMutation.isPending ? 'Saving' : 'Live'}</strong>{' '}
-                            ordering mode
-                          </span>
-                        </div>
-                        <span className={styles.tableNote}>
-                          Drag any row and drop it on another row to reorder instantly.
-                        </span>
-                      </div>
-
-                      <div className={styles.tableWrap}>
-                        <table className={styles.table}>
-                          <thead>
-                            <tr>
-                              <th />
-                              <th>Year</th>
-                              <th>Month</th>
-                              <th>Event</th>
-                              <th>Status</th>
-                              <th>Order</th>
-                              <th>Updated</th>
-                              <th>Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {entries.map((entry) => (
-                              <tr
-                                data-testid={`history-row-${entry.id}`}
-                                draggable={!orderMutation.isPending}
-                                key={entry.id}
-                                onDragOver={(event) => event.preventDefault()}
-                                onDragStart={() => setDraggingId(entry.id)}
-                                onDrop={() => handleDrop(entry.id)}
+                      <AdminTableToolbar
+                        controls={[
+                          {
+                            id: 'history-search-input',
+                            label: 'Search',
+                            control: (
+                              <input
+                                className={styles.input}
+                                data-testid="history-search-input"
+                                id="history-search-input"
+                                onChange={(event) => setSearchKeyword(event.target.value)}
+                                placeholder="Search title or description"
+                                value={searchKeyword}
+                              />
+                            ),
+                          },
+                          {
+                            id: 'history-status-filter',
+                            label: 'Status',
+                            control: (
+                              <select
+                                className={styles.select}
+                                data-testid="history-status-filter"
+                                id="history-status-filter"
+                                onChange={(event) =>
+                                  setStatusFilter(event.target.value as HistoryStatusFilter)
+                                }
+                                value={statusFilter}
                               >
-                                <td>
-                                  <span className={styles.dragHandle}>⋮⋮</span>
-                                </td>
-                                <td>{entry.year}</td>
-                                <td>{formatMonth(entry.month)}</td>
-                                <td>
-                                  <div className={styles.tableLead}>
-                                    <span className={styles.cellTitle}>{entry.title}</span>
-                                    <span className={styles.tableSubtext}>
-                                      {trimText(entry.description, 96)}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td>
-                                  <span
-                                    className={
-                                      entry.isActive ? styles.badge : styles.badgeMuted
-                                    }
-                                  >
-                                    {entry.isActive ? 'Active' : 'Hidden'}
-                                  </span>
-                                </td>
-                                <td>{entry.displayOrder}</td>
-                                <td>{formatKoreanDate(entry.updatedAt)}</td>
-                                <td>
-                                  <div className={styles.rowActions}>
-                                    <button
-                                      className={styles.actionButton}
-                                      data-testid={`history-edit-${entry.id}`}
-                                      onClick={() => setEditingItem(entry)}
-                                      type="button"
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      className={styles.actionButton}
-                                      data-testid={`history-delete-${entry.id}`}
-                                      onClick={() => setDeleteTarget(entry)}
-                                      type="button"
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="hidden">Hidden</option>
+                              </select>
+                            ),
+                          },
+                        ]}
+                        meta={
+                          <>
+                            <span className={styles.statPill}>
+                              <strong>{yearGroups.length}</strong> year clusters
+                            </span>
+                            <span className={styles.statPill}>
+                              <strong>{inactiveCount}</strong> hidden items
+                            </span>
+                            <span className={styles.statPill}>
+                              <strong>{orderMutation.isPending ? 'Saving' : 'Live'}</strong>{' '}
+                              ordering mode
+                            </span>
+                            <span className={styles.tableNote}>
+                              {canReorder
+                                ? 'Drag any row and drop it on another row to reorder instantly.'
+                                : 'Clear the current filters to enable drag-and-drop ordering.'}
+                            </span>
+                          </>
+                        }
+                      />
+
+                      <AdminDataTable
+                        columns={historyColumns}
+                        emptyCellClassName={styles.emptyTableCell}
+                        emptyState={
+                          <div className={styles.emptyState}>
+                            No history entries are registered in the timeline.
+                          </div>
+                        }
+                        getRowKey={(entry) => entry.id}
+                        getRowProps={(entry) => ({
+                          draggable: canReorder && !orderMutation.isPending,
+                          onDragOver: (event) => event.preventDefault(),
+                          onDragStart: () => setDraggingId(entry.id),
+                          onDrop: () => handleDrop(entry.id),
+                        })}
+                        getRowTestId={(entry) => `history-row-${entry.id}`}
+                        rows={entries}
+                        tableClassName={styles.table}
+                        wrapClassName={styles.tableWrap}
+                      />
                     </section>
                   </div>
 

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminBusinessPage from '../../src/pages/AdminBusinessPage'
+import type { AdminListResponse } from '../../src/types/admin'
 import { makeAdminMe, makeBusinessArea } from './fixtures'
 import { renderWithProviders } from './renderWithProviders'
 
@@ -55,10 +56,44 @@ describe('AdminBusinessPage', () => {
         subtitle: '친환경 인프라',
         displayOrder: 1,
       }),
+      makeBusinessArea({
+        id: 302,
+        title: 'Digital Platform',
+        subtitle: 'Connected operating system',
+        isActive: false,
+        displayOrder: 2,
+      }),
     ]
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
-    adminApiMocks.getAdminBusinessAreas.mockImplementation(async () => businessState.items)
+    adminApiMocks.getAdminBusinessAreas.mockImplementation(async (filters) => {
+      const keyword = filters?.keyword?.trim().toLowerCase()
+
+      const items = businessState.items.filter((item) => {
+        const matchesKeyword =
+          !keyword ||
+          item.title.toLowerCase().includes(keyword) ||
+          (item.subtitle ?? '').toLowerCase().includes(keyword)
+        const matchesActive =
+          typeof filters?.isActive === 'boolean'
+            ? item.isActive === filters.isActive
+            : true
+
+        return matchesKeyword && matchesActive
+      })
+
+      return {
+        items,
+        page: 0,
+        size: 100,
+        totalElements: items.length,
+        totalPages: 1,
+        sortBy: 'displayOrder',
+        sortDirection: 'ASC',
+        hasNext: false,
+        hasPrevious: false,
+      } satisfies AdminListResponse<(typeof businessState.items)[number]>
+    })
     adminApiMocks.updateBusiness.mockImplementation(async (id, payload) => {
       const updated = makeBusinessArea({
         ...businessState.items.find((item) => item.id === id),
@@ -118,5 +153,29 @@ describe('AdminBusinessPage', () => {
         within(screen.getByTestId('business-row-301')).getByText('스마트 물류'),
       ).toBeInTheDocument()
     })
+  })
+
+  it('filters business areas by hidden status', async () => {
+    const user = userEvent.setup()
+
+    renderWithProviders(<AdminBusinessPage />, { route: '/admin/business' })
+
+    await screen.findByTestId('business-row-301')
+
+    await user.selectOptions(screen.getByTestId('business-status-filter'), 'hidden')
+
+    await waitFor(() => {
+      expect(adminApiMocks.getAdminBusinessAreas).toHaveBeenLastCalledWith({
+        keyword: undefined,
+        isActive: false,
+        page: 0,
+        size: 100,
+        sortBy: 'displayOrder',
+        sortDirection: 'ASC',
+      })
+    })
+
+    await screen.findByTestId('business-row-302')
+    expect(screen.queryByTestId('business-row-301')).not.toBeInTheDocument()
   })
 })

@@ -14,7 +14,7 @@ interface AdminLayoutProps {
 
 const menuSections = [
   {
-    label: 'Overview',
+    label: '운영 개요',
     items: [
       {
         code: 'OV',
@@ -25,7 +25,7 @@ const menuSections = [
     ],
   },
   {
-    label: 'Content Operations',
+    label: '콘텐츠 운영',
     items: [
       {
         code: 'HS',
@@ -56,14 +56,14 @@ function AdminLayout({
   children,
 }: AdminLayoutProps) {
   const navigate = useNavigate()
-  const operatorName = adminName ?? 'Preview Admin'
+  const operatorName = adminName ?? '프리뷰 관리자'
   const operatorInitial = operatorName.trim().charAt(0).toUpperCase()
 
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brandBlock}>
-          <span className={styles.environment}>Preview Workspace</span>
+          <span className={styles.environment}>프리뷰 작업공간</span>
           <p className={styles.logo}>{BRAND_NAME}</p>
           <p className={styles.caption}>{'\uad00\ub9ac\uc790 \ucf58\uc194'}</p>
         </div>
@@ -72,7 +72,7 @@ function AdminLayout({
           <span className={styles.operatorAvatar}>{operatorInitial}</span>
           <div>
             <p className={styles.operatorName}>{operatorName}</p>
-            <span className={styles.operatorStatus}>Secure Session Active</span>
+            <span className={styles.operatorStatus}>보안 세션 정상</span>
           </div>
         </div>
 
@@ -120,7 +120,7 @@ function AdminLayout({
       <div className={styles.workspace}>
         <div className={styles.topbar}>
           <div>
-            <p className={styles.topbarLabel}>Operations Workspace</p>
+            <p className={styles.topbarLabel}>운영 작업공간</p>
             <p className={styles.breadcrumb}>
               {'\uad00\ub9ac\uc790 \ud398\uc774\uc9c0'}
               <span>/</span>
@@ -128,25 +128,25 @@ function AdminLayout({
             </p>
           </div>
           <div className={styles.topbarActions}>
-            <span className={styles.topbarChip}>Preview Mode</span>
-            <span className={styles.topbarChipMuted}>Internal Console</span>
+            <span className={styles.topbarChip}>프리뷰 모드</span>
+            <span className={styles.topbarChipMuted}>내부 콘솔</span>
           </div>
         </div>
 
         <div className={styles.content}>
-        <header className={styles.header}>
-          <div className={styles.headerCopy}>
-            <p className={styles.pageLabel}>{'\uad00\ub9ac\uc790 \ud398\uc774\uc9c0'}</p>
-            <h1 className={styles.title}>{title}</h1>
-            {description ? <p className={styles.description}>{description}</p> : null}
-          </div>
-          <div className={styles.profile}>
-            <span className={styles.profileLabel}>Operator</span>
-            <strong>{operatorName}</strong>
-          </div>
-        </header>
-        <div className={styles.panel}>{children}</div>
-      </div>
+          <header className={styles.header}>
+            <div className={styles.headerCopy}>
+              <p className={styles.pageLabel}>{'\uad00\ub9ac\uc790 \ud398\uc774\uc9c0'}</p>
+              <h1 className={styles.title}>{title}</h1>
+              {description ? <p className={styles.description}>{description}</p> : null}
+            </div>
+            <div className={styles.profile}>
+              <span className={styles.profileLabel}>운영자</span>
+              <strong>{operatorName}</strong>
+            </div>
+          </header>
+          <div className={styles.panel}>{children}</div>
+        </div>
       </div>
     </div>
   )

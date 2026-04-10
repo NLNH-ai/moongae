@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminHistoryPage from '../../src/pages/AdminHistoryPage'
-import { toHistoryGroups } from '../../src/utils/helpers'
+import type { AdminListResponse } from '../../src/types/admin'
 import { makeAdminMe, makeHistoryEntry } from './fixtures'
 import { renderWithProviders } from './renderWithProviders'
 
@@ -15,7 +15,7 @@ const adminApiMocks = vi.hoisted(() => ({
   createHistory: vi.fn(),
   deleteHistory: vi.fn(),
   deleteUpload: vi.fn(),
-  getAdminHistoryGroups: vi.fn(),
+  getAdminHistoryEntries: vi.fn(),
   getAdminMe: vi.fn(),
   updateHistory: vi.fn(),
   updateHistoryOrder: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock('../../src/api/admin', () => ({
   createHistory: adminApiMocks.createHistory,
   deleteHistory: adminApiMocks.deleteHistory,
   deleteUpload: adminApiMocks.deleteUpload,
-  getAdminHistoryGroups: adminApiMocks.getAdminHistoryGroups,
+  getAdminHistoryEntries: adminApiMocks.getAdminHistoryEntries,
   getAdminMe: adminApiMocks.getAdminMe,
   updateHistory: adminApiMocks.updateHistory,
   updateHistoryOrder: adminApiMocks.updateHistoryOrder,
@@ -53,8 +53,18 @@ describe('AdminHistoryPage', () => {
     ]
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
-    adminApiMocks.getAdminHistoryGroups.mockImplementation(async () =>
-      toHistoryGroups(historyState.entries),
+    adminApiMocks.getAdminHistoryEntries.mockImplementation(
+      async (): Promise<AdminListResponse<(typeof historyState.entries)[number]>> => ({
+        items: historyState.entries,
+        page: 0,
+        size: 100,
+        totalElements: historyState.entries.length,
+        totalPages: 1,
+        sortBy: 'timeline',
+        sortDirection: 'DESC',
+        hasNext: false,
+        hasPrevious: false,
+      }),
     )
     adminApiMocks.createHistory.mockImplementation(async (payload) => {
       const created = makeHistoryEntry({

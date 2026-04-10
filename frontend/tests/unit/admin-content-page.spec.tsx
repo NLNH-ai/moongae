@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminContentPage from '../../src/pages/AdminContentPage'
+import type { AdminListResponse } from '../../src/types/admin'
 import { createPageContentMap, makeAdminMe, makePageContent } from './fixtures'
 import { renderWithProviders } from './renderWithProviders'
 
@@ -54,7 +55,19 @@ describe('AdminContentPage', () => {
 
     adminApiMocks.getAdminMe.mockResolvedValue(makeAdminMe())
     adminApiMocks.getAdminPageContents.mockImplementation(async (pageKey) => {
-      return contentState.itemsByPage[pageKey]
+      const items = contentState.itemsByPage[pageKey]
+
+      return {
+        items,
+        page: 0,
+        size: 100,
+        totalElements: items.length,
+        totalPages: 1,
+        sortBy: 'displayOrder',
+        sortDirection: 'ASC',
+        hasNext: false,
+        hasPrevious: false,
+      } satisfies AdminListResponse<(typeof items)[number]>
     })
     adminApiMocks.updateContent.mockImplementation(async (id, payload) => {
       const pageKey = (

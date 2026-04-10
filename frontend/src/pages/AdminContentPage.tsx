@@ -14,7 +14,7 @@ import {
   updateContent,
   uploadImage,
 } from '../api/admin'
-import { publicQueryKeys } from '../api/queryKeys'
+import { adminQueryKeys, publicQueryKeys } from '../api/queryKeys'
 import ImageUploadField from '../components/admin/ImageUploadField'
 import AdminLayout from '../components/admin/AdminLayout'
 import PageTransition from '../components/common/PageTransition'
@@ -53,15 +53,24 @@ function AdminContentPage() {
   const [drafts, setDrafts] = useState<ContentDraftMap>({})
   const [uploadingItemId, setUploadingItemId] = useState<number | null>(null)
   const [uploadedFileIds, setUploadedFileIds] = useState<Record<number, number | null>>({})
+  const contentFilters = useMemo(
+    () => ({
+      page: 0,
+      size: 100,
+      sortBy: 'displayOrder' as const,
+      sortDirection: 'ASC' as const,
+    }),
+    [],
+  )
 
   const adminQuery = useQuery({
-    queryKey: ['admin', 'me'],
+    queryKey: adminQueryKeys.me,
     queryFn: getAdminMe,
   })
 
   const contentQuery = useQuery({
-    queryKey: publicQueryKeys.pageContents(selectedPage),
-    queryFn: () => getAdminPageContents(selectedPage),
+    queryKey: adminQueryKeys.pageContents({ pageKey: selectedPage, ...contentFilters }),
+    queryFn: () => getAdminPageContents(selectedPage, contentFilters),
   })
 
   const saveMutation = useMutation({
@@ -83,6 +92,9 @@ function AdminContentPage() {
         return nextDrafts
       })
       await queryClient.invalidateQueries({
+        queryKey: ['admin', 'content'],
+      })
+      await queryClient.invalidateQueries({
         queryKey: publicQueryKeys.pageContents(selectedPage),
       })
     },
@@ -98,7 +110,7 @@ function AdminContentPage() {
     },
   })
 
-  const items = useMemo(() => contentQuery.data ?? [], [contentQuery.data])
+  const items = useMemo(() => contentQuery.data?.items ?? [], [contentQuery.data?.items])
 
   const selectedDraftCount = useMemo(
     () =>
@@ -206,7 +218,7 @@ function AdminContentPage() {
         className={styles.loginShell}
         style={{ minHeight: 'auto', paddingTop: '7rem' }}
       >
-        <div className="container" style={{ width: 'var(--container-width)' }}>
+        <div className={styles.adminViewport}>
           <AdminLayout
             adminName={adminQuery.data?.name}
             description="페이지별 섹션 편집, 이미지 교체, 게시 상태 제어를 한 흐름으로 정리했습니다."

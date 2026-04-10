@@ -9,6 +9,11 @@
     linear-gradient(180deg, #eef3f8 0%, #f7f9fb 46%, #eef2f6 100%);
 }
 
+.adminViewport {
+  width: min(1520px, 100%);
+  margin: 0 auto;
+}
+
 .loginCard {
   width: min(100%, 34rem);
   padding: 2rem;
@@ -760,6 +765,11 @@
   text-align: center;
 }
 
+.emptyTableCell {
+  padding: 1.25rem;
+  background-color: #ffffff;
+}
+
 .dashboardGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.85fr);
@@ -826,6 +836,24 @@
   justify-content: space-between;
   gap: 0.75rem 1rem;
   margin-bottom: 1rem;
+}
+
+.toolbarFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.toolbarControl {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.toolbarControl .input,
+.toolbarControl .select {
+  min-width: 12rem;
 }
 
 .toolbarMeta {
@@ -1057,6 +1085,19 @@
     align-items: flex-start;
   }
 
+  .toolbarFilters {
+    width: 100%;
+  }
+
+  .toolbarControl {
+    width: 100%;
+  }
+
+  .toolbarControl .input,
+  .toolbarControl .select {
+    min-width: 0;
+  }
+
   .tableNote {
     text-align: left;
   }
@@ -1065,6 +1106,10 @@
 @media (max-width: 767px) {
   .loginShell {
     padding: 1rem;
+  }
+
+  .adminViewport {
+    width: 100%;
   }
 
   .loginLayout,

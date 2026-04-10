@@ -1,4 +1,8 @@
 import type {
+  AdminBusinessFilters,
+  AdminContentFilters,
+  AdminHistoryFilters,
+  AdminListResponse,
   AdminMe,
   BusinessUpsertPayload,
   ContentUpdatePayload,
@@ -10,8 +14,9 @@ import type {
   ApiResponse,
   BusinessAreaItem,
   HistoryEntry,
-  PageKey,
+  HistoryGroup,
   PageContentItem,
+  PageKey,
 } from '../types/domain'
 import { isDemoMode } from '../config/runtime'
 import {
@@ -21,10 +26,10 @@ import {
   deleteDemoBusiness,
   deleteDemoHistory,
   deleteDemoUpload,
+  getDemoAdminBusinessList,
+  getDemoAdminContentList,
   getDemoAdminMe,
-  getDemoBusinessAreas,
-  getDemoHistoryGroups,
-  getDemoPageContents,
+  getDemoAdminHistoryList,
   loginDemoAdmin,
   updateDemoBusiness,
   updateDemoContent,
@@ -32,14 +37,15 @@ import {
   updateDemoHistoryOrder,
   uploadDemoImage,
 } from '../mocks/demoCmsStore'
-import {
-  getBusinessAreas,
-  getHistoryGroups,
-  getPageContents,
-} from './public'
+import { toHistoryGroups } from '../utils/helpers'
 import { apiClient } from './client'
 
 export { DEMO_ADMIN_CREDENTIALS }
+
+function normalizeKeyword(keyword?: string) {
+  const trimmed = keyword?.trim()
+  return trimmed ? trimmed : undefined
+}
 
 export async function loginAdmin(payload: {
   username: string
@@ -65,28 +71,86 @@ export async function getAdminMe() {
   return data.data
 }
 
-export async function getAdminHistoryGroups() {
+export async function getAdminHistoryEntries(
+  filters: AdminHistoryFilters = {},
+) {
   if (isDemoMode) {
-    return getDemoHistoryGroups({ includeInactive: true })
+    return getDemoAdminHistoryList(filters)
   }
 
-  return getHistoryGroups()
+  const { data } = await apiClient.get<ApiResponse<AdminListResponse<HistoryEntry>>>(
+    '/admin/history',
+    {
+      params: {
+        keyword: normalizeKeyword(filters.keyword),
+        isActive: filters.isActive,
+        year: filters.year,
+        page: filters.page ?? 0,
+        size: filters.size ?? 100,
+        sortBy: filters.sortBy ?? 'timeline',
+        sortDirection: filters.sortDirection ?? 'DESC',
+      },
+    },
+  )
+
+  return data.data
 }
 
-export async function getAdminBusinessAreas() {
-  if (isDemoMode) {
-    return getDemoBusinessAreas({ includeInactive: true })
-  }
-
-  return getBusinessAreas()
+export async function getAdminHistoryGroups(
+  filters: AdminHistoryFilters = {},
+): Promise<HistoryGroup[]> {
+  const response = await getAdminHistoryEntries(filters)
+  return toHistoryGroups(response.items)
 }
 
-export async function getAdminPageContents(pageKey: PageKey) {
+export async function getAdminBusinessAreas(
+  filters: AdminBusinessFilters = {},
+) {
   if (isDemoMode) {
-    return getDemoPageContents(pageKey, { includeInactive: true })
+    return getDemoAdminBusinessList(filters)
   }
 
-  return getPageContents(pageKey)
+  const { data } = await apiClient.get<ApiResponse<AdminListResponse<BusinessAreaItem>>>(
+    '/admin/business',
+    {
+      params: {
+        keyword: normalizeKeyword(filters.keyword),
+        isActive: filters.isActive,
+        page: filters.page ?? 0,
+        size: filters.size ?? 100,
+        sortBy: filters.sortBy ?? 'displayOrder',
+        sortDirection: filters.sortDirection ?? 'ASC',
+      },
+    },
+  )
+
+  return data.data
+}
+
+export async function getAdminPageContents(
+  pageKey: PageKey,
+  filters: Omit<AdminContentFilters, 'pageKey'> = {},
+) {
+  if (isDemoMode) {
+    return getDemoAdminContentList({ ...filters, pageKey })
+  }
+
+  const { data } = await apiClient.get<ApiResponse<AdminListResponse<PageContentItem>>>(
+    '/admin/content',
+    {
+      params: {
+        pageKey,
+        keyword: normalizeKeyword(filters.keyword),
+        isActive: filters.isActive,
+        page: filters.page ?? 0,
+        size: filters.size ?? 100,
+        sortBy: filters.sortBy ?? 'displayOrder',
+        sortDirection: filters.sortDirection ?? 'ASC',
+      },
+    },
+  )
+
+  return data.data
 }
 
 export async function createHistory(payload: HistoryUpsertPayload) {
